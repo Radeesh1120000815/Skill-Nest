@@ -24,17 +24,30 @@
 /* ---------------------------------------------------------
    2. Global Reset & Base Styles
    --------------------------------------------------------- */
-html {
-  scroll-behavior: smooth;
-}
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* 🔴 Typography (Standardized & Fixed) */
+  /* text-gray-900 අයින් කළා, එතකොට parent ගෙන් color එක inherit වෙනවා */
+  h1, h2, h3 {
+    @apply font-bold tracking-tight;
+  }
+
+  h1 { @apply text-4xl md:text-5xl my-6; }
+  h2 { @apply text-2xl md:text-3xl my-4; }
+
+  p { @apply leading-relaxed; }
 }
 
 /* Vite Layout Fix - centered app container */
@@ -69,15 +82,3 @@ body {
         border-color: #374151;
   }
 }
-
-/* ---------------------------------------------------------
-   4. Typography (Standardized)
-   --------------------------------------------------------- */
-h1, h2, h3 {
-  @apply font-bold tracking-tight text-gray-900 dark:text-white;
-}
-
-h1 { @apply text-4xl md:text-5xl my-6; }
-h2 { @apply text-2xl md:text-3xl my-4; }
-
-p { @apply leading-relaxed; }

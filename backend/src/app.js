@@ -5,6 +5,14 @@ import authRoutes from './routes/authRoutes.js';
 import groupRoutes from './routes/groupRoutes.js'; 
 import quizRoutes from './routes/quizRoutes.js';
 
+//Resource Mnagement Routes
+import resourceRoutes      from './routes/resourceRoutes.js';
+import bookmarkRoutes      from './routes/bookmarkRoutes.js';
+import adminResourceRoutes from './routes/adminResourceRoutes.js';
+
+
+
+
 const app = express();
 
 // 🔴 Ultimate CORS Fix - සියලුම Origins සහ Headers වලට ඉඩ දීම
@@ -15,11 +23,18 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Required for multipart form fields
+
+
 
 // API Endpoints
 app.use('/api/auth', authRoutes); 
 app.use('/api/groups', groupRoutes); 
 app.use('/api/quizzes', quizRoutes);
+app.use('/api/resources',        resourceRoutes);      // Public + auth resource endpoints
+app.use('/api/bookmarks',        bookmarkRoutes);      // GET /api/bookmarks/my
+app.use('/api/admin/resources',  adminResourceRoutes); // Admin approval queue
+
 
 // Test Route
 app.get('/', (req, res) => {

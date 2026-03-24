@@ -1,4 +1,4 @@
-import mongoose from mongoose;
+import mongoose from 'mongoose';
 
 const resourceVersionSchema = new mongoose.Schema(
   {

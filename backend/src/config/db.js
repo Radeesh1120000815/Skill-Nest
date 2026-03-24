@@ -1,4 +1,17 @@
 import mongoose from 'mongoose';
+import dns from 'dns';
+
+/**
+ * MongoDB connection logic using ES Modules
+ * Path: backend/src/config/db.js
+ */
+
+//  apply DNS override if provided in local .env, fixing dns issue
+if (process.env.DNS_SERVERS) {
+  dns.setServers(
+    process.env.DNS_SERVERS.split(',').map((server) => server.trim())
+  );
+}
 
 /**
  * MongoDB connection logic using ES Modules

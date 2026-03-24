@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 const resourceRatingSchema = new mongoose.Schema(
   {
     resourceId: {

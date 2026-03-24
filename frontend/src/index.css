@@ -1,3 +1,49 @@
+/* Button Hover Effects */
+.nav-btn:hover {
+  background: #ffbe4d;
+  color: #0f172a;
+  box-shadow: 0 4px 16px 0 #f5a62344;
+}
+.btn-learnmore:hover, .learn-more-btn:hover {
+  background: #fff;
+  color: #1e40af !important;
+  border: 1.5px solid #1e40af;
+  box-shadow: 0 2px 12px 0 #1e40af22;
+}
+.btn-getstarted, .join-free-btn, .cta-btn, .join-skill-nest-btn {
+  background: #f5a623;
+  color: #0f172a;
+  border-radius: 18px;
+  font-weight: 700;
+  border: none;
+  padding: 16px 40px;
+  font-size: 1.15rem;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+.btn-getstarted:hover, .join-free-btn:hover, .cta-btn:hover, .join-skill-nest-btn:hover {
+  background: #ffbe4d;
+  color: #0f172a;
+  box-shadow: 0 4px 16px 0 #f5a62344;
+}
+/* Custom Navigation and Footer Link Hover Effects */
+.nav-a, .footer-link, .foot-col a, .foot-col .footer-link, .nav-btn {
+  transition: color 0.18s, background 0.18s, box-shadow 0.18s;
+}
+.nav-a:hover {
+  color: #fff !important;
+  background: rgba(255,255,255,0.13);
+  border-radius: 7px;
+}
+.footer-link:hover, .foot-col a:hover, .foot-col .footer-link:hover {
+  color: #f5a623 !important;
+  background: rgba(245, 166, 35, 0.12);
+  border-radius: 7px;
+}
+.nav-btn:hover {
+  background: #ffbe4d;
+  color: #0f172a;
+  box-shadow: 0 4px 16px 0 #f5a62344;
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

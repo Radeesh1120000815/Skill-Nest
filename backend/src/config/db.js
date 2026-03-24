@@ -6,6 +6,10 @@ import mongoose from 'mongoose';
  */
 const connectDB_Server = async () => {
   try {
+    if (!process.env.MONGO_URI) {
+      throw new Error('MONGO_URI is missing. Add it in backend/.env or start with SKIP_DB=true');
+    }
+
     // process.env.MONGO_URI eka .env file eken gannawa
     const conn = await mongoose.connect(process.env.MONGO_URI, {
       serverSelectionTimeoutMS: 5000, 

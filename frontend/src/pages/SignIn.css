@@ -1,0 +1,9 @@
+.signin-link-underline {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+  transition: text-decoration 0.15s;
+}
+.signin-link-underline:hover, .signin-link-underline:focus {
+  text-decoration: underline;
+}

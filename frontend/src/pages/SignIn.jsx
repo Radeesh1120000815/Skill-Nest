@@ -1,8 +1,9 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './SignIn.css';
 import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import axios from 'axios';
 
 const Favicon = () => (
 	<svg width="24" height="24" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight:8,verticalAlign:'middle'}}>
@@ -27,11 +28,56 @@ export default function SignIn() {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
+	const [errors, setErrors] = useState({});
+	const [loading, setLoading] = useState(false);
+	const navigate = useNavigate();
+
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		let err = {};
+		if (!email.trim()) {
+			err.email = 'Email is required.';
+		}
+		if (!password.trim()) {
+			err.password = 'Password is required.';
+		}
+		setErrors(err);
+		if (Object.keys(err).length > 0) return;
+
+		try {
+			setLoading(true);
+			setErrors({});
+			const API_URL = 'http://localhost:5001/api/auth/login';
+			const response = await axios.post(API_URL, { email, password });
+
+			// Save user info (token, role, etc.) for dashboards
+			localStorage.setItem('userInfo', JSON.stringify(response.data));
+			const userRole = response.data.role?.toLowerCase();
+
+			if (userRole === 'admin') {
+				navigate('/admin-dashboard');
+			} else if (userRole === 'lecturer') {
+				navigate('/lecturer-dashboard');
+			} else {
+				// default: treat as student
+				navigate('/student-dashboard');
+			}
+		} catch (error) {
+			const message =
+				error.response?.data?.message ||
+				error.response?.data?.error ||
+				'Invalid email or password. Please try again.';
+			setErrors(prev => ({ ...prev, api: message }));
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return (
 		<div style={{ background: 'linear-gradient(135deg,#dde8ff 0%,#eef2ff 40%,#f0e8ff 100%)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 			<Navbar />
 			<main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 5%' }}>
-				<div style={{ background: '#fff', borderRadius: 28, padding: '48px 44px', maxWidth: 440, width: '100%', boxShadow: '0 8px 40px 0 #1e40af11', margin: '0 auto' }}>
+				<form onSubmit={handleSubmit} style={{ background: '#fff', borderRadius: 28, padding: '48px 44px', maxWidth: 440, width: '100%', boxShadow: '0 8px 40px 0 #1e40af11', margin: '0 auto' }}>
 					{/* Logo and Title */}
 					<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
 						<div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
@@ -74,6 +120,12 @@ export default function SignIn() {
 							</button>
 						</div>
 					</div>
+					{/* API error */}
+					{errors.api && (
+						<div className="signin-error-msg" style={{ marginBottom: 12 }}>
+							{errors.api}
+						</div>
+					)}
 					{/* Divider */}
 					<div style={{ display: 'flex', alignItems: 'center', margin: '28px 0 18px 0' }}>
 						<div style={{ flex: 1, height: 1, background: '#e5e7eb' }}></div>
@@ -91,48 +143,68 @@ export default function SignIn() {
 						<div style={{ margin: '0 16px', color: '#888', fontWeight: 500, fontSize: 14 }}>Or sign in with email</div>
 						<div style={{ flex: 1, height: 1, background: '#e5e7eb' }}></div>
 					</div>
-					{/* Email Field */}
-					<div style={{ marginBottom: 16 }}>
-						<label style={{ display: 'block', fontWeight: 600, color: '#222', marginBottom: 6, fontSize: 15 }}>Email address</label>
-						<input
-							type="email"
-							placeholder={
-								accountType === 'lecturer' ? 'lecturer@gmail.com' :
-								accountType === 'admin' ? 'admin@gmail.com' :
-								'you@gmail.com'
-							}
-							value={email}
-							onChange={e => setEmail(e.target.value)}
-							style={{ width: '100%', padding: '14px 14px', borderRadius: 12, border: '1.5px solid #e5e7eb', fontSize: 16, color: '#222', background: '#f8fafc', outline: 'none', fontWeight: 500 }}
-						/>
-					</div>
-					{/* Password Field */}
-					<div style={{ marginBottom: 10, position: 'relative' }}>
-						<label style={{ display: 'block', fontWeight: 600, color: '#222', marginBottom: 6, fontSize: 15 }}>Password</label>
-						<input type={showPassword ? 'text' : 'password'} placeholder="Enter your password" value={password} onChange={e => setPassword(e.target.value)} style={{ width: '100%', padding: '14px 44px 14px 14px', borderRadius: 12, border: '1.5px solid #e5e7eb', fontSize: 16, color: '#222', background: '#f8fafc', outline: 'none', fontWeight: 500 }} />
-						<button type="button" onClick={() => setShowPassword(v => !v)} style={{ position: 'absolute', right: 12, top: 38, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-							{showPassword ? (
-								<svg width="22" height="22" fill="none" stroke="#888" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.06 10.06 0 0 1 12 19c-5 0-9.27-3.11-10-7 .73-3.89 5-7 10-7 1.61 0 3.13.31 4.5.86"/><path d="M1 1l22 22"/></svg>
-							) : (
-								<svg width="22" height="22" fill="none" stroke="#888" strokeWidth="2" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="10" ry="7"/><circle cx="12" cy="12" r="3"/></svg>
-							)}
+						{/* Email Field */}
+						<div style={{ marginBottom: errors.email ? 4 : 16 }}>
+							<label style={{ display: 'block', fontWeight: 600, color: '#222', marginBottom: 6, fontSize: 15 }}>Email address</label>
+							<input
+								type="email"
+								placeholder={
+									accountType === 'lecturer' ? 'lecturer@gmail.com' :
+									accountType === 'admin' ? 'admin@gmail.com' :
+									'you@gmail.com'
+								}
+								value={email}
+								onChange={e => {
+									setEmail(e.target.value);
+									if (errors.email) setErrors({ ...errors, email: '' });
+								}}
+								className={errors.email ? 'signin-input-error' : ''}
+								style={{ width: '100%', padding: '14px 14px', borderRadius: 12, border: errors.email ? '1.5px solid #dc2626' : '1.5px solid #e5e7eb', fontSize: 16, color: '#222', background: '#f8fafc', outline: 'none', fontWeight: 500 }}
+							/>
+							{errors.email && <div className="signin-error-msg">{errors.email}</div>}
+						</div>
+						{/* Password Field */}
+						<div style={{ marginBottom: errors.password ? 4 : 10, position: 'relative' }}>
+							<label style={{ display: 'block', fontWeight: 600, color: '#222', marginBottom: 6, fontSize: 15 }}>Password</label>
+							<input
+								type={showPassword ? 'text' : 'password'}
+								placeholder="Enter your password"
+								value={password}
+								onChange={e => {
+									setPassword(e.target.value);
+									if (errors.password) setErrors({ ...errors, password: '' });
+								}}
+								className={errors.password ? 'signin-input-error' : ''}
+								style={{ width: '100%', padding: '14px 44px 14px 14px', borderRadius: 12, border: errors.password ? '1.5px solid #dc2626' : '1.5px solid #e5e7eb', fontSize: 16, color: '#222', background: '#f8fafc', outline: 'none', fontWeight: 500 }}
+							/>
+							<button type="button" onClick={() => setShowPassword(v => !v)} style={{ position: 'absolute', right: 12, top: 38, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+								{showPassword ? (
+									// Eye icon when password is visible
+									<svg width="22" height="22" fill="none" stroke="#888" strokeWidth="2" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="10" ry="7"/><circle cx="12" cy="12" r="3"/></svg>
+								) : (
+									// Eye-off icon when password is hidden
+									<svg width="22" height="22" fill="none" stroke="#888" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.06 10.06 0 0 1 12 19c-5 0-9.27-3.11-10-7 .73-3.89 5-7 10-7 1.61 0 3.13.31 4.5.86"/><path d="M1 1l22 22"/></svg>
+								)}
+							</button>
+							{errors.password && <div className="signin-error-msg">{errors.password}</div>}
+						</div>
+						{/* Remember me and Forgot password */}
+						<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+							<label style={{ display: 'flex', alignItems: 'center', fontSize: 15, color: '#222', fontWeight: 500 }}>
+								<input type="checkbox" style={{ marginRight: 8, accentColor: '#3b5bfe', width: 16, height: 16 }} />
+								Remember me
+							</label>
+							<Link to="/main-forgot" className="signin-link-underline">Forgot your password?</Link>
+						</div>
+						{/* Sign In Button */}
+						<button type="submit" className="signin-btn" disabled={loading}>
+							{loading ? 'Signing in...' : 'Sign In'}
 						</button>
-					</div>
-					{/* Remember me and Forgot password */}
-					<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-						<label style={{ display: 'flex', alignItems: 'center', fontSize: 15, color: '#222', fontWeight: 500 }}>
-							<input type="checkbox" style={{ marginRight: 8, accentColor: '#3b5bfe', width: 16, height: 16 }} />
-							Remember me
-						</label>
-						<Link to="/main-forgot" className="signin-link-underline">Forgot your password?</Link>
-					</div>
-					{/* Sign In Button */}
-					<button type="submit" style={{ width: '100%', background: 'linear-gradient(90deg,#2563eb 0%,#3b5bfe 100%)', color: '#fff', fontWeight: 700, fontSize: 20, border: 'none', borderRadius: 14, padding: '16px 0', marginBottom: 18, boxShadow: '0 4px 18px #3b5bfe22', cursor: 'pointer', transition: 'all .2s' }}>Sign In</button>
-					{/* Create account link */}
-					<div style={{ textAlign: 'center', fontSize: 15, color: '#222', fontWeight: 500 }}>
-						Don't have an account? <Link to="/register" className="signin-link-underline">Create one free</Link>
-					</div>
-				</div>
+						{/* Create account link */}
+						<div style={{ textAlign: 'center', fontSize: 15, color: '#222', fontWeight: 500 }}>
+							Don't have an account? <Link to="/register" className="signin-link-underline">Create one free</Link>
+						</div>
+					</form>
 			</main>
 			<Footer />
 		</div>

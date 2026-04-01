@@ -30,24 +30,28 @@ const Login = () => {
       let response;
       
       if (isLogin) {
-        response = await axios.post(`${API_URL}/login`, { 
-          email, 
-          password 
+        response = await axios.post(`${API_URL}/login`, {
+          email,
+          password,
         });
       } else {
-        response = await axios.post(`${API_URL}/register`, { 
-          name, 
-          email, 
-          password, 
-          role 
+        response = await axios.post(`${API_URL}/register`, {
+          name,
+          email,
+          password,
+          role,
         });
       }
 
       localStorage.setItem('userInfo', JSON.stringify(response.data));
-      
+
       const userRole = response.data.role?.toLowerCase();
-      
-      if (userRole === 'senior' || userRole === 'mentor' || userRole === 'both') {
+
+      if (userRole === 'admin') {
+        navigate('/admin-dashboard');
+      } else if (userRole === 'lecturer') {
+        navigate('/lecturer-dashboard');
+      } else if (userRole === 'senior' || userRole === 'mentor' || userRole === 'both') {
         navigate('/senior-dashboard');
       } else {
         navigate('/junior-dashboard');
@@ -98,9 +102,36 @@ const Login = () => {
             
             {/* Role Toggle Switch - (Only show when Sign Up) */}
             {!isLogin && (
-              <div className="flex bg-gray-100 p-1.5 rounded-xl mb-4 shadow-inner">
-                <button type="button" onClick={() => setRole('junior')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${role === 'junior' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>🎓 Register as Learner</button>
-                <button type="button" onClick={() => setRole('senior')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${role === 'senior' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>👨‍🏫 Register as Mentor</button>
+              <div className="mb-4">
+                <div className="flex bg-gray-100 p-1.5 rounded-xl shadow-inner">
+                  <button
+                    type="button"
+                    onClick={() => setRole('junior')}
+                    className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${role === 'junior' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    🎓 Register as Learner
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRole('senior')}
+                    className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${role === 'senior' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    👨‍🏫 Register as Mentor
+                  </button>
+                </div>
+                <div className="flex items-center justify-between text-xs text-gray-500 mt-2">
+                  <span>
+                    Registering as:{' '}
+                    <span className="font-semibold text-indigo-600 capitalize">{role}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setRole('admin')}
+                    className={`font-semibold ${role === 'admin' ? 'text-purple-600' : 'text-gray-500 hover:text-purple-600'}`}
+                  >
+                    👑 Register as Admin
+                  </button>
+                </div>
               </div>
             )}
 

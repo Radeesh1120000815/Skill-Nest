@@ -1,9 +1,13 @@
 
 import React, { useState, useEffect } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Footer from '../components/Footer';
+import axios from 'axios';
 
 const initialRole = "Student";
+const STUDENT_KEY = "registeredStudents";
+
 
 export default function Register() {
   useEffect(() => {
@@ -17,14 +21,34 @@ export default function Register() {
     password: "",
     confirm: ""
   });
+
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [lastUser, setLastUser] = useState(null);
+  const [studentList, setStudentList] = useState([]);
+  const [showStudentPopup, setShowStudentPopup] = useState(false);
   const navigate = useNavigate();
+
+
+  // Load students from localStorage when role is Student
+  useEffect(() => {
+    if (role === "Student") {
+      const saved = localStorage.getItem(STUDENT_KEY);
+      setStudentList(saved ? JSON.parse(saved) : []);
+    } else {
+      setStudentList([]);
+    }
+  }, [role]);
 
   const handleRole = (r) => {
     setRole(r);
     setForm((f) => ({ ...f, id: "" }));
     setErrors({});
+    if (r === "Student") {
+      setShowStudentPopup(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -93,13 +117,48 @@ export default function Register() {
     return valid;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    setSuccess(true);
-    setTimeout(() => {
-      navigate("/signin");
-    }, 2000);
+    try {
+      const backendUrl = "http://localhost:5001";
+      let endpoint = `${backendUrl}/api/auth/register`;
+      if (role === "Lecturer") endpoint = `${backendUrl}/api/lecturers/register`;
+      if (role === "Student") endpoint = `${backendUrl}/api/students/register`;
+      const payload = {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        ...(role === "Student" && { studentId: form.id }),
+        ...(role === "Lecturer" && { lecturerId: form.id }),
+        ...(role === "Admin" && { role: "admin" })
+      };
+      await axios.post(endpoint, payload);
+      setSuccess(true);
+      setLastUser({
+        name: form.name,
+        email: form.email,
+        id: form.id,
+        role: role
+      });
+      // Save student to localStorage if role is Student
+      if (role === "Student") {
+        const saved = localStorage.getItem(STUDENT_KEY);
+        let students = saved ? JSON.parse(saved) : [];
+        // Prevent duplicates by ID or email
+        if (!students.some(s => s.id === form.id || s.email === form.email)) {
+          students.push({ name: form.name, id: form.id, email: form.email });
+          localStorage.setItem(STUDENT_KEY, JSON.stringify(students));
+          setStudentList(students);
+        }
+      }
+      setTimeout(() => {
+        navigate("/signin");
+      }, 2000);
+    } catch (err) {
+      setErrors({ api: err.response?.data?.error || "Registration failed. Please try again." });
+      setSuccess(false);
+    }
   };
 
   return (
@@ -159,8 +218,25 @@ export default function Register() {
           {success && <div className="success-banner bg-green-50 border border-green-300 text-green-700 rounded-lg px-4 py-2 mb-3 text-center font-semibold">✓ Account created successfully! Redirecting to Sign In...</div>}
           <form onSubmit={handleSubmit} autoComplete="off">
             <div className="fields-group border border-slate-200 rounded-xl overflow-hidden mb-5">
-              <div className="field-wrap border-b border-slate-200">
+              <div className="field-wrap border-b border-slate-200 relative">
                 <input type="text" name="name" value={form.name} onChange={handleChange} placeholder="Full Name" className="block w-full px-6 py-5 text-lg text-slate-900 bg-white outline-none" />
+                {/* Student popup (absolute) */}
+                {role === "Student" && showStudentPopup && studentList.length > 0 && (
+                  <div className="absolute left-0 top-full z-20 w-full bg-white border border-blue-200 rounded-xl shadow-lg mt-1 max-h-56 overflow-y-auto">
+                    {studentList.map((stud, idx) => (
+                      <div
+                        key={stud.id + stud.email}
+                        className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm text-slate-800"
+                        onClick={() => {
+                          setForm(f => ({ ...f, name: stud.name, id: stud.id, email: stud.email }));
+                          setShowStudentPopup(false);
+                        }}
+                      >
+                        <b>Name:</b> {stud.name} <span className="mx-2">|</span> <b>ID:</b> {stud.id} <span className="mx-2">|</span> <b>Email:</b> {stud.email}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               {errors.name && <div className="field-error-wrap px-4 py-2"><span className="err-msg text-red-600 text-base">{errors.name}</span></div>}
               {(role==="Student"||role==="Lecturer") && <>
@@ -173,17 +249,59 @@ export default function Register() {
                 <input type="email" name="email" value={form.email} onChange={handleChange} placeholder={role==="Student"?"Email (e.g. student@gmail.com)":role==="Lecturer"?"Email (e.g. lecturer@gmail.com)":"Email (e.g. admin@gmail.com)"} className="block w-full px-6 py-5 text-lg text-slate-900 bg-white outline-none" />
               </div>
               {errors.email && <div className="field-error-wrap px-4 py-2"><span className="err-msg text-red-600 text-base">{errors.email}</span></div>}
-              <div className="field-wrap border-b border-slate-200">
-                <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="Password (min 8 characters)" className="block w-full px-6 py-5 text-lg text-slate-900 bg-white outline-none" />
+              <div className="field-wrap border-b border-slate-200 relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="Password (min 8 characters)"
+                  className="block w-full px-6 py-5 text-lg text-slate-900 bg-white outline-none pr-12"
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 focus:outline-none"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <FaEye /> : <FaEyeSlash />}
+                </button>
               </div>
               {errors.password && <div className="field-error-wrap px-4 py-2"><span className="err-msg text-red-600 text-base">{errors.password}</span></div>}
-              <div className="field-wrap">
-                <input type="password" name="confirm" value={form.confirm} onChange={handleChange} placeholder="Confirm Password" className="block w-full px-6 py-5 text-lg text-slate-900 bg-white outline-none" />
+              <div className="field-wrap relative">
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  name="confirm"
+                  value={form.confirm}
+                  onChange={handleChange}
+                  placeholder="Confirm Password"
+                  className="block w-full px-6 py-5 text-lg text-slate-900 bg-white outline-none pr-12"
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 focus:outline-none"
+                  onClick={() => setShowConfirm((v) => !v)}
+                  aria-label={showConfirm ? "Hide password" : "Show password"}
+                >
+                  {showConfirm ? <FaEye /> : <FaEyeSlash />}
+                </button>
               </div>
               {errors.confirm && <div className="field-error-wrap px-4 py-2"><span className="err-msg text-red-600 text-base">{errors.confirm}</span></div>}
             </div>
             <button type="submit" className="btn-signup w-full bg-gradient-to-r from-blue-800 to-blue-600 text-white font-bold rounded-xl py-3 shadow-lg hover:opacity-90 transition mb-2" disabled={success}>{success?"✓ Account Created!":"Sign up"}</button>
           </form>
+          {/* Last Registered User Info */}
+          {lastUser && (
+            <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+              <div className="font-bold text-blue-900 mb-2">Last Registered User</div>
+              <div className="text-sm text-slate-800"><b>Name:</b> {lastUser.name}</div>
+              <div className="text-sm text-slate-800"><b>Email:</b> {lastUser.email}</div>
+              <div className="text-sm text-slate-800"><b>ID:</b> {lastUser.id}</div>
+              <div className="text-sm text-slate-800"><b>Role:</b> {lastUser.role}</div>
+            </div>
+          )}
           <p className="terms text-xs text-slate-400 text-center mt-3 leading-relaxed">By signing up you agree to our <span className="text-blue-700 font-bold">Terms of Service</span> and <span className="text-blue-700 font-bold">Privacy Policy</span></p>
         </div>
       </main>

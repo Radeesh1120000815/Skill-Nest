@@ -5,15 +5,24 @@ const userSchema = mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    role: { 
-      type: String, 
-      enum: ['junior', 'senior', 'both'], 
-      default: 'junior' 
+    lecturerId: { type: String },
+    studentId: { type: String },
+    role: {
+      type: String,
+      enum: ['junior', 'senior', 'both', 'lecturer', 'student', 'admin'], // Only lowercase roles allowed
+      default: 'junior',
     },
     batch_details: {
       year: Number,
       semester: Number,
       specialization: String,
+    },
+
+    // Account status for admin management
+    status: {
+      type: String,
+      enum: ['active', 'blocked'],
+      default: 'active',
     },
     
     // 🔴 Gamification: Badges array with timestamp

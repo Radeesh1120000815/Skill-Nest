@@ -71,6 +71,29 @@ export const getMySessions = async (req, res) => {
   }
 };
 
+// @desc    Get all sessions for the logged-in lecturer (upcoming + completed)
+// @route   GET /api/sessions/my/all
+// @access  Private
+export const getMyAllSessions = async (req, res) => {
+  try {
+    await ensureDbConnection();
+
+    const lecturerId = req.user?._id || req.headers['x-user-id'];
+    if (!lecturerId) {
+      return res.status(401).json({ message: 'Not authorized: lecturer not found' });
+    }
+
+    const sessions = await Session.find({ lecturer: lecturerId })
+      .sort({ date: -1 })
+      .lean();
+
+    return res.json(sessions);
+  } catch (error) {
+    console.error('Get all sessions error:', error.message);
+    return res.status(200).json([]);
+  }
+};
+
 // @desc    Update an existing session (Lecturer only)
 // @route   PUT /api/sessions/:id
 // @access  Private

@@ -1,5 +1,5 @@
 import express from 'express';
-import { createSession, getMySessions, updateSession, deleteSession } from '../controllers/sessionController.js';
+import { createSession, getMySessions, getMyAllSessions, updateSession, deleteSession } from '../controllers/sessionController.js';
 
 const router = express.Router();
 
@@ -8,6 +8,9 @@ router.post('/', createSession);
 
 // Get sessions for logged-in lecturer (uses x-user-id header from frontend)
 router.get('/my', getMySessions);
+
+// Get all sessions (upcoming + completed) for logged-in lecturer
+router.get('/my/all', getMyAllSessions);
 
 // Update a specific session
 router.put('/:id', updateSession);

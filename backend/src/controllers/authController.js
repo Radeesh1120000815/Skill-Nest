@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto'; // Token generate karanna use karana library eka
 import nodemailer from 'nodemailer'; // 🔴 Aluthen ekathu kala: Email yawanna
+import { ensureDbConnection } from '../config/db.js';
 
 // Helper function to create the JWT token
 const generateToken = (id) => {
@@ -19,6 +20,9 @@ export const registerUser = async (req, res) => {
   const { name, email, password, role, batch_details } = req.body;
 
   try {
+    // Ensure we have an active DB connection before querying
+    await ensureDbConnection();
+
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
@@ -55,20 +59,46 @@ export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    // Make sure DB is connected before querying
+    await ensureDbConnection();
 
-    // bcrypt.compare use karala login eka check kireema
-    if (user && (await bcrypt.compare(password, user.password))) {
-      res.json({
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    let passwordMatches = false;
+
+    // Normal case: password already hashed with bcrypt
+    if (user.password && user.password.startsWith('$2')) {
+      passwordMatches = await bcrypt.compare(password, user.password);
+    } else {
+      // Legacy case: password was stored as plain text (e.g., older lecturer accounts)
+      if (user.password === password) {
+        passwordMatches = true;
+
+        // Migrate to hashed password for better security
+        try {
+          const salt = await bcrypt.genSalt(10);
+          user.password = await bcrypt.hash(password, salt);
+          await user.save();
+        } catch (hashError) {
+          console.error('Error upgrading legacy password hash:', hashError.message);
+        }
+      }
+    }
+
+    if (passwordMatches) {
+      return res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
         token: generateToken(user._id),
       });
-    } else {
-      res.status(401).json({ message: 'Invalid email or password' });
     }
+
+    return res.status(401).json({ message: 'Invalid email or password' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

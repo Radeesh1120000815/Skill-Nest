@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 
 export default function LecturerDashboard() {
   const [user, setUser] = useState(null);
-  const [sessions, setSessions] = useState([]);
+  const [allSessions, setAllSessions] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,17 +22,17 @@ export default function LecturerDashboard() {
         const userId = parsed?._id;
 
         axios
-          .get(`${backendUrl}/api/sessions/my`, {
+          .get(`${backendUrl}/api/sessions/my/all`, {
             headers: {
               ...(token ? { Authorization: `Bearer ${token}` } : {}),
               ...(userId ? { 'x-user-id': userId } : {}),
             },
           })
           .then((res) => {
-            setSessions(res.data || []);
+            setAllSessions(res.data || []);
           })
           .catch(() => {
-            setSessions([]);
+            setAllSessions([]);
           });
       } catch {
         setUser(null);
@@ -46,17 +46,26 @@ export default function LecturerDashboard() {
     navigate('/lecturer-create-session');
   };
 
-  const stats = {
-    totalSessions: sessions.length,
-    activeStudents: 0,
-    pendingRequests: 0,
-    completedSessions: 0,
-  };
+  const now = new Date();
+  const completedSessions = allSessions
+    .filter((session) => {
+      const startMs = new Date(session.date).getTime();
+      const durationMs = Number(session.durationMinutes || 0) * 60 * 1000;
+      return startMs + durationMs < now.getTime();
+    })
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-  const upcoming = sessions
-    .slice()
+  const upcoming = allSessions
+    .filter((session) => new Date(session.date) >= now)
     .sort((a, b) => new Date(a.date) - new Date(b.date))
     .slice(0, 3);
+
+  const stats = {
+    totalSessions: allSessions.length,
+    activeStudents: 0,
+    pendingRequests: 0,
+    completedSessions: completedSessions.length,
+  };
 
   const formatDateTime = (iso) => {
     if (!iso) return '';
@@ -119,7 +128,11 @@ export default function LecturerDashboard() {
               <p className="text-2xl font-extrabold text-slate-900">{stats.pendingRequests}</p>
             </div>
           </div>
-          <div className="bg-white rounded-2xl shadow-sm px-5 py-4 border border-indigo-50 flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => navigate('/lecturer-completed-sessions')}
+            className="bg-white rounded-2xl shadow-sm px-5 py-4 border border-indigo-50 flex items-center gap-4 text-left hover:bg-indigo-50/40 transition-colors"
+          >
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-indigo-700 text-xl">
               ✅
             </div>
@@ -127,7 +140,7 @@ export default function LecturerDashboard() {
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Completed Sessions</p>
               <p className="text-2xl font-extrabold text-slate-900">{stats.completedSessions}</p>
             </div>
-          </div>
+          </button>
         </section>
 
         {/* Pending booking requests */}
@@ -185,6 +198,7 @@ export default function LecturerDashboard() {
             </div>
           )}
         </section>
+
       </main>
       <Footer />
     </div>

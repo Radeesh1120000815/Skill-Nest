@@ -8,6 +8,14 @@ import SignIn from './pages/SignIn';
 import Register from './pages/Register';
 import JuniorDashboard from './pages/JuniorDashboard';
 import SeniorDashboard from './pages/SeniorDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminManageUsers from './pages/AdminManageUsers';
+import AdminSessionsOverview from './pages/AdminSessionsOverview';
+import StudentDashboard from './pages/StudentDashboard';
+import LecturerDashboard from './pages/LecturerDashboard';
+import LecturerCreateSession from './pages/LecturerCreateSession';
+import LecturerSessions from './pages/LecturerSessions';
+import LecturerCompletedSessions from './pages/LecturerCompletedSessions';
 import ForgotPassword from './pages/ForgotPassword';
 import MainForgot from './pages/MainForgot';
 import Resources from './pages/Resources';
@@ -45,9 +53,18 @@ function App() {
           <Route path="/main-forgot" element={<MainForgot />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/register" element={<Register />} />
-          {/* Dashboard Routes (Mentorship platform eke dashboards) */}
+          {/* Dashboard Routes */}
+          <Route path="/student-dashboard" element={<StudentDashboard />} />
+          <Route path="/lecturer-dashboard" element={<LecturerDashboard />} />
+          <Route path="/lecturer-create-session" element={<LecturerCreateSession />} />
+          <Route path="/lecturer-sessions" element={<LecturerSessions />} />
+          <Route path="/lecturer-completed-sessions" element={<LecturerCompletedSessions />} />
+          {/* Friends' dashboards (unchanged) */}
           <Route path="/junior-dashboard" element={<JuniorDashboard />} />
           <Route path="/senior-dashboard" element={<SeniorDashboard />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/users" element={<AdminManageUsers />} />
+          <Route path="/admin/sessions" element={<AdminSessionsOverview />} />
           {/* Oya dila nathi path ekak gahuvoth Login ekata redirect karanawa (404 safety) */}
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>

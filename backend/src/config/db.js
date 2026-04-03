@@ -10,19 +10,30 @@ const connectDB_Server = async () => {
       throw new Error('MONGO_URI is missing. Add it in backend/.env or start with SKIP_DB=true');
     }
 
-    // process.env.MONGO_URI eka .env file eken gannawa
     const conn = await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 5000, 
+      serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
     });
 
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`❌ Database Connection Error: ${error.message}`);
-    
-    // Exit process on failure - Container orchestration (Docker/K8s) walata wadagath
     process.exit(1);
   }
+};
+
+// Helper: ensure there is an active DB connection (used in controllers)
+export const ensureDbConnection = async () => {
+  if (mongoose.connection.readyState === 1) return; // already connected
+  if (!process.env.MONGO_URI) {
+    throw new Error('MONGO_URI is missing. Cannot ensure DB connection.');
+  }
+  console.log('ensureDbConnection: connecting. Current readyState =', mongoose.connection.readyState);
+  await mongoose.connect(process.env.MONGO_URI, {
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+  });
+  console.log('ensureDbConnection: connected. New readyState =', mongoose.connection.readyState);
 };
 
 export default connectDB_Server;

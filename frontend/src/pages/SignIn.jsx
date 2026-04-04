@@ -50,16 +50,29 @@ export default function SignIn() {
 			const API_URL = 'http://localhost:5001/api/auth/login';
 			const response = await axios.post(API_URL, { email, password });
 
-			// Save user info (token, role, etc.) for dashboards
-			localStorage.setItem('userInfo', JSON.stringify(response.data));
 			const userRole = response.data.role?.toLowerCase();
+			const resolvedAccountType = userRole === 'admin'
+				? 'admin'
+				: userRole === 'lecturer'
+					? 'lecturer'
+					: 'student';
 
-			if (userRole === 'admin') {
+			// Enforce that selected account type matches authenticated role.
+			if (resolvedAccountType !== accountType) {
+				setErrors({
+					api: `This account belongs to ${resolvedAccountType}. Please select the ${resolvedAccountType} role and try again.`,
+				});
+				return;
+			}
+
+			// Save user info only when selected role and actual role are aligned.
+			localStorage.setItem('userInfo', JSON.stringify(response.data));
+
+			if (resolvedAccountType === 'admin') {
 				navigate('/admin-dashboard');
-			} else if (userRole === 'lecturer') {
+			} else if (resolvedAccountType === 'lecturer') {
 				navigate('/lecturer-dashboard');
 			} else {
-				// default: treat as student
 				navigate('/student-dashboard');
 			}
 		} catch (error) {

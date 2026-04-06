@@ -19,7 +19,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   // 🛠️ Backend Base URL
-  const API_URL = 'http://localhost:5001/api/auth';
+  const API_URL = 'http://localhost:5000/api/auth';
 
   const handleSubmit = async (e) => {
     e.preventDefault();

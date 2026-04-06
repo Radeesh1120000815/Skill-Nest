@@ -24,6 +24,15 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    //  normalise role to uppercase for resource module
+    const roleMap = {
+      'Student': 'STUDENT', 'student': 'STUDENT',
+      'Lecturer': 'LECTURER', 'lecturer': 'LECTURER',
+      'Admin': 'ADMIN', 'admin': 'ADMIN',
+    };
+    const normalisedRole = roleMap[role] || role;
+    // END OF ADDITION
+
     // Password hashing (Salting)
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -32,7 +41,7 @@ export const registerUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role,
+      role:normalisedRole,
       batch_details
     });
 
@@ -59,6 +68,18 @@ export const loginUser = async (req, res) => {
 
     // bcrypt.compare use karala login eka check kireema
     if (user && (await bcrypt.compare(password, user.password))) {
+
+      // validate selected role matches actual role
+      const roleMap = {
+        'student': 'STUDENT', 'lecturer': 'LECTURER', 'admin': 'ADMIN'
+      };
+      const expectedRole = roleMap[req.body.role];
+      if (expectedRole && user.role !== expectedRole) {
+        return res.status(401).json({ 
+          message: `This account is registered as ${user.role.charAt(0) + user.role.slice(1).toLowerCase()}. Please select the correct account type.` 
+        });
+      }
+      // ROLE 
       res.json({
         _id: user._id,
         name: user.name,
@@ -232,3 +253,4 @@ export const updatePassword = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+

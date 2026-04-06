@@ -31,7 +31,7 @@ export default function SearchFilterBar({ filters, onFilterChange, onClear, acti
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-      {/* ── Main search row ────────────────────────────────────────────── */}
+      {/* Main search row */}
       <div className="flex items-center gap-3 p-3">
         {/* Search input */}
         <div className="relative flex-1">
@@ -94,7 +94,7 @@ export default function SearchFilterBar({ filters, onFilterChange, onClear, acti
         </button>
       </div>
 
-      {/* ── Advanced Filters ───────────────────────────────────────────── */}
+      {/* Advanced Filters  */}
       {isExpanded && (
         <div className="border-t border-gray-100 bg-gray-50 px-4 py-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">

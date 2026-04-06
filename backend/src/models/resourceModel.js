@@ -11,26 +11,26 @@ const resourceSchema = new mongoose.Schema(
 
     moduleCode: {
       type: String,
-      required: [true, 'Module code is required'],
+      //required: [true, 'Module code is required'],
       trim: true,
       uppercase: true,
     },
     moduleName: {
       type: String,
-      required: [true, 'Module name is required'],
+      //required: [true, 'Module name is required'],
       trim: true,
     },
 
     academicYear: {
       type: String,
-      required: [true, 'Academic year is required'],
+      //required: [true, 'Academic year is required'],
       trim: true,
       // Format: "2023/2024"
     },
 
     semester: {
       type: String,
-      required: [true, 'Semester is required'],
+      //required: [true, 'Semester is required'],
       enum: {
         values: ['SEMESTER_1', 'SEMESTER_2', 'FULL_YEAR'],
         message: 'Semester must be SEMESTER_1, SEMESTER_2, or FULL_YEAR',

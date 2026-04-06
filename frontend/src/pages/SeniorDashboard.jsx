@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { 
   BookOpen, Calendar, Users, BarChart3, 
   LogOut, Bell, Search, Settings, Star, Clock, 
@@ -78,7 +80,7 @@ const SeniorDashboard = () => {
   // Modals States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ 
-    module_name: '', max_members: 10, session_link: '', semester: '', quiz_link: ''    
+    module_name: '', max_members: 50, session_link: '', semester: '', quiz_link: ''     
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -272,7 +274,6 @@ const SeniorDashboard = () => {
     localStorage.setItem('platformMessages', JSON.stringify(updated));
   };
 
-  // Edit specific reply inside the thread array
   const handleEditThreadReply = (threadId, replyId, newText) => {
       if(!newText.trim()) return;
       const updatedMessages = platformMessages.map(m => {
@@ -301,7 +302,6 @@ const SeniorDashboard = () => {
       setPlatformMessages(updatedMessages);
       localStorage.setItem('platformMessages', JSON.stringify(updatedMessages));
   }
-
 
   const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
@@ -589,28 +589,33 @@ const SeniorDashboard = () => {
   const myFeedback = myInbox.filter(m => m.type === 'Feedback').slice(0, 2);
 
   // 🔴 CENTRALIZED MENTOR XP & RANK CALCULATION
+  const getCalculatedMentorXP = (mentor) => {
+     const baseXP = mentor.points || 0;
+     const hosted = myGroups.filter(g => (g.senior_id?._id || g.senior_id) === mentor._id).length;
+     const students = myGroups.filter(g => (g.senior_id?._id || g.senior_id) === mentor._id).reduce((sum, g) => sum + (g.current_members?.length || 0), 0);
+     return baseXP + (hosted * 500) + (students * 150) + 3000; 
+  };
+
   const globalRankedMentors = [...globalMentors].map((mentor) => {
     const isMe = mentor._id === user?._id;
-    const baseXP = mentor.points || 0;
-    const hosted = myGroups.filter(g => (g.senior_id?._id || g.senior_id) === mentor._id).length;
-    const students = myGroups.filter(g => (g.senior_id?._id || g.senior_id) === mentor._id).reduce((sum, g) => sum + (g.current_members?.length || 0), 0);
-    
-    let offset = 0;
-    if (mentor._id) { offset = parseInt(mentor._id.toString().slice(-4), 16) || 0; }
-    const xp = baseXP + (hosted * 500) + (students * 150) + 3000 + (offset % 500);
-
+    const rawXP = getCalculatedMentorXP(mentor);
     return {
       id: mentor._id,
       name: mentor.name,
-      xp: xp, 
+      xp: rawXP, 
       level: "Senior Expert",
       avatar: mentor.avatar, 
       initial: mentor.name ? mentor.name.charAt(0).toUpperCase() : 'M',
       isMe: isMe
     };
-  }).sort((a, b) => b.xp - a.xp);
+  })
+  .sort((a, b) => b.xp - a.xp) // Sort initially by raw calculated XP
+  .map((mentor, index) => {
+     // Apply deduction exactly based on their ordered rank
+     return { ...mentor, xp: mentor.xp - (index * 340) };
+  });
 
-  // Get current user's specific XP and Rank
+  // Get current user's specific XP and Rank from the synchronized array
   const myMentorData = globalRankedMentors.find(m => m.isMe);
   const calculatedXP = myMentorData ? myMentorData.xp : 0;
   const myGlobalRank = globalRankedMentors.findIndex(m => m.isMe) + 1;
@@ -890,7 +895,7 @@ const SeniorDashboard = () => {
                       <button onClick={() => handleApproveRequest(group._id, student._id)} className="p-1.5 rounded-lg bg-emerald-100 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-colors" title="Approve">
                         <CheckCircle className="w-4 h-4" />
                       </button>
-                      <button onClick={() => handleRejectRequest(group._id, student._id)} className="p-1.5 rounded-lg bg-rose-100 text-rose-600 hover:bg-rose-500 hover:text-white transition-colors" title="Reject">
+                      <button onClick={() => handleRejectRequest(group._id, student._id)} className="p-1.5 rounded-lg bg-rose-100 text-rose-600 hover:bg-rose-50 hover:text-rose-600 hover:text-white transition-colors" title="Reject">
                         <X className="w-4 h-4" />
                       </button>
                     </div>
@@ -1139,7 +1144,13 @@ const SeniorDashboard = () => {
                             <button onClick={() => {setReplyingTo(null); setReplyText('');}} className="flex-1 sm:flex-none px-6 py-3.5 text-xs font-black text-gray-500 bg-gray-100 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 border border-transparent rounded-2xl transition-all shadow-sm">
                               Cancel
                             </button>
-                            <button onClick={() => handleThreadReply(msg.id)} 
+                            <button onClick={() => {
+                                if(thread.length === 0 && !msg.reply) {
+                                  handleReplySubmit(msg.id); // Use old method for first reply compatibility
+                                } else {
+                                  handleThreadReply(msg.id); // Append to thread array
+                                }
+                              }} 
                               disabled={!replyText.trim() || replyText.length > 500} className="flex-1 sm:flex-none px-8 py-3.5 text-xs font-black text-white bg-gradient-to-r from-fuchsia-600 to-indigo-600 hover:from-fuchsia-500 hover:to-indigo-500 rounded-2xl shadow-xl shadow-fuchsia-500/30 transition-all flex items-center justify-center hover:-translate-y-1 group/send disabled:opacity-50 disabled:hover:translate-y-0">
                               Send Reply <Send className="w-4 h-4 ml-2 group-hover/send:translate-x-1 group-hover/send:-translate-y-1 transition-transform" />
                             </button>
@@ -1202,11 +1213,11 @@ const SeniorDashboard = () => {
         {filteredSessions.map((group, index) => {
           const fillPercentage = (group.current_members.length / group.max_members) * 100;
           return (
-            <div key={group._id} className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 hover:border-fuchsia-200 transition-all duration-300 relative text-left flex flex-col group/card hover:shadow-xl">
+            <div key={group._id} className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:border-fuchsia-200 transition-all duration-300 relative text-left flex flex-col group/card hover:shadow-xl">
               
               <div className="absolute top-6 right-6 flex space-x-2">
                 <button onClick={() => openEditModal(group)} className="p-2.5 bg-indigo-50 text-indigo-500 hover:bg-indigo-500 hover:text-white rounded-xl transition-all shadow-sm border border-indigo-100" title="Edit"><Edit3 className="w-4 h-4" /></button>
-                <button onClick={() => handleDeleteSession(group._id, group.module_name)} className="p-2.5 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-all shadow-sm border border-rose-100" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                <button onClick={() => handleDeleteSession(group._id, group.module_name)} className="p-2.5 bg-rose-50 text-rose-500 hover:bg-rose-50 hover:text-white rounded-xl transition-all shadow-sm border border-rose-100" title="Delete"><Trash2 className="w-4 h-4" /></button>
               </div>
 
               <div className="flex items-center mb-6">
@@ -1383,14 +1394,26 @@ const SeniorDashboard = () => {
       <div className="flex flex-col lg:flex-row gap-8">
         
         <div className="w-full lg:w-72 space-y-3">
-          <button onClick={() => setSettingsTab('profile')} className={`w-full flex items-center px-6 py-5 rounded-[1.5rem] font-black transition-all ${settingsTab === 'profile' ? 'bg-fuchsia-800 text-white shadow-lg shadow-fuchsia-900/30 translate-x-2' : 'bg-white text-gray-500 hover:bg-fuchsia-50 border border-gray-100'}`}>
-             <User className="w-5 h-5 mr-4" /> Expert Profile
+          <button 
+             onClick={() => setSettingsTab('profile')} 
+             style={{ backgroundColor: settingsTab === 'profile' ? '#1e3a8a' : 'transparent' }}
+             className={`flex items-center w-full px-6 py-5 rounded-[1.5rem] font-black transition-all border-none outline-none ${settingsTab === 'profile' ? '!text-white shadow-md translate-x-2' : '!text-slate-500 hover:bg-blue-50 border border-slate-100'}`}
+          >
+             <User className="w-5 h-5 mr-4 shrink-0" /> <span className="whitespace-nowrap">Expert Profile</span>
           </button>
-          <button onClick={() => setSettingsTab('security')} className={`w-full flex items-center px-6 py-5 rounded-[1.5rem] font-black transition-all ${settingsTab === 'security' ? 'bg-fuchsia-800 text-white shadow-lg shadow-fuchsia-900/30 translate-x-2' : 'bg-white text-gray-500 hover:bg-fuchsia-50 border border-gray-100'}`}>
-             <Key className="w-5 h-5 mr-4" /> Security
+          <button 
+             onClick={() => setSettingsTab('security')} 
+             style={{ backgroundColor: settingsTab === 'security' ? '#1e3a8a' : 'transparent' }}
+             className={`flex items-center w-full px-6 py-5 rounded-[1.5rem] font-black transition-all border-none outline-none ${settingsTab === 'security' ? '!text-white shadow-md translate-x-2' : '!text-slate-500 hover:bg-blue-50 border border-slate-100'}`}
+          >
+             <Key className="w-5 h-5 mr-4 shrink-0" /> <span className="whitespace-nowrap">Security</span>
           </button>
-          <button onClick={() => setSettingsTab('notifications')} className={`w-full flex items-center px-6 py-5 rounded-[1.5rem] font-black transition-all ${settingsTab === 'notifications' ? 'bg-fuchsia-800 text-white shadow-lg shadow-fuchsia-900/30 translate-x-2' : 'bg-white text-gray-500 hover:bg-fuchsia-50 border border-gray-100'}`}>
-             <BellRing className="w-5 h-5 mr-4" /> Notifications
+          <button 
+             onClick={() => setSettingsTab('notifications')} 
+             style={{ backgroundColor: settingsTab === 'notifications' ? '#1e3a8a' : 'transparent' }}
+             className={`flex items-center w-full px-6 py-5 rounded-[1.5rem] font-black transition-all border-none outline-none ${settingsTab === 'notifications' ? '!text-white shadow-md translate-x-2' : '!text-slate-500 hover:bg-blue-50 border border-slate-100'}`}
+          >
+             <BellRing className="w-5 h-5 mr-4 shrink-0" /> <span className="whitespace-nowrap">Notifications</span>
           </button>
         </div>
 
@@ -1559,133 +1582,175 @@ const SeniorDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#F4F7FE] flex font-sans text-gray-800 selection:bg-fuchsia-100 selection:text-fuchsia-900">
+    <div className="min-h-screen flex flex-col w-full max-w-full overflow-x-hidden bg-[#F4F7FE] font-sans text-gray-800 selection:bg-fuchsia-100 selection:text-fuchsia-900">
       
-      {/* 🟢 PREMIUM SIDEBAR */}
-      <aside className="w-64 fixed h-[calc(100vh-2rem)] my-4 ml-4 bg-white/80 backdrop-blur-xl rounded-[3rem] hidden md:flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] z-20 overflow-hidden border border-white">
-        <div>
-          <div className="h-28 flex items-center px-8">
-            <div className="w-12 h-12 bg-gradient-to-br from-fuchsia-600 to-indigo-600 rounded-2xl flex items-center justify-center mr-4 shadow-xl shadow-fuchsia-200">
-              <Zap className="w-7 h-7 text-white fill-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-black text-gray-900 tracking-tight leading-none">Kuppi</h1>
-              <h1 className="text-xl font-bold text-fuchsia-600 tracking-wide leading-none">Mentor.</h1>
-            </div>
-          </div>
-          <nav className="p-5 space-y-3 text-left">
-            <button onClick={() => setActiveTab('dashboard')} className={`flex items-center w-full px-5 py-4 rounded-2xl font-bold transition-all ${activeTab === 'dashboard' ? 'bg-fuchsia-800 text-white shadow-lg shadow-fuchsia-900/30' : 'text-gray-500 hover:bg-fuchsia-50 hover:text-fuchsia-600'}`}>
-              <LayoutDashboard className="w-5 h-5 mr-3" /> Dashboard
-            </button>
-            <button onClick={() => setActiveTab('sessions')} className={`flex items-center w-full px-5 py-4 rounded-2xl font-bold transition-all ${activeTab === 'sessions' ? 'bg-fuchsia-800 text-white shadow-lg shadow-fuchsia-900/30' : 'text-gray-500 hover:bg-fuchsia-50 hover:text-fuchsia-600'}`}>
-              <BookOpen className="w-5 h-5 mr-3" /> My Sessions
-            </button>
-            <button onClick={() => setActiveTab('leaderboard')} className={`flex items-center w-full px-5 py-4 rounded-2xl font-bold transition-all ${activeTab === 'leaderboard' ? 'bg-fuchsia-800 text-white shadow-lg shadow-fuchsia-900/30' : 'text-gray-500 hover:bg-fuchsia-50 hover:text-fuchsia-600'}`}>
-              <Award className="w-5 h-5 mr-3" /> Rankings
-            </button>
-            {/* 🔴 NEW: INBOX TAB FOR SENIOR */}
-            <button onClick={() => setActiveTab('inbox')} className={`flex justify-between items-center w-full px-5 py-4 rounded-2xl font-bold transition-all ${activeTab === 'inbox' ? 'bg-fuchsia-800 text-white shadow-lg shadow-fuchsia-900/30' : 'text-gray-500 hover:bg-fuchsia-50 hover:text-fuchsia-600'}`}>
-              <span className="flex items-center"><Inbox className="w-5 h-5 mr-3" /> Messages</span>
-              {unreadMessagesCount > 0 && <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${activeTab === 'inbox' ? 'bg-white text-fuchsia-800' : 'bg-rose-500 text-white animate-pulse'}`}>{unreadMessagesCount}</span>}
-            </button>
-            <button onClick={() => setActiveTab('settings')} className={`flex items-center w-full px-5 py-4 rounded-2xl font-bold transition-all ${activeTab === 'settings' ? 'bg-fuchsia-800 text-white shadow-lg shadow-fuchsia-900/30' : 'text-gray-500 hover:bg-fuchsia-50 hover:text-fuchsia-600'}`}>
-              <Settings className="w-5 h-5 mr-3" /> Settings
-            </button>
-          </nav>
-        </div>
-        <div className="p-5">
-          <button onClick={handleLogout} className="flex items-center justify-center w-full px-5 py-4 text-gray-500 bg-gray-50 hover:bg-rose-50 hover:text-rose-600 rounded-2xl font-bold transition-all border border-transparent hover:border-rose-100">
-            <LogOut className="w-5 h-5 mr-2" /> Sign Out
-          </button>
-        </div>
-      </aside>
+      {/* Top Global Navbar */}
+      <div className="w-full z-[200] relative">
+        <Navbar />
+      </div>
 
-      <main className="flex-1 md:ml-[18rem] flex flex-col min-h-screen">
+      {/* Main Layout Container */}
+      <div className="flex flex-1 w-full relative">
         
-        <header className="h-28 flex items-center justify-between px-8 sticky top-0 z-30 bg-[#F4F7FE]/90 backdrop-blur-2xl transition-all">
-          <div className="relative w-[28rem] hidden sm:block group">
-            <Search className="w-5 h-5 absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-fuchsia-600 transition-colors" />
-            <input type="text" value={globalSearch} onChange={(e) => setGlobalSearch(e.target.value)} placeholder="Search your dashboard..." className="w-full pl-14 pr-4 py-4 bg-white border-2 border-transparent focus:border-fuchsia-200 rounded-2xl outline-none text-sm font-bold text-gray-700 shadow-sm transition-all focus:shadow-md" />
+        {/* 🟢 PREMIUM SIDEBAR (ORIGINAL 1st PHOTO DESIGN) */}
+        <aside className="fixed top-[84px] left-0 h-[calc(100vh-100px)] w-[260px] ml-6 bg-white/90 backdrop-blur-xl rounded-[2.5rem] hidden md:flex flex-col justify-between shadow-[0_10px_40px_rgba(0,0,0,0.04)] z-40 border border-white py-6">
+          <div className="flex flex-col w-full">
+            
+            {/* 🔴 Used style objects instead of classes to prevent external CSS interference */}
+            <div className="flex flex-col w-full px-5 gap-2 mt-4">
+              <button 
+                onClick={() => setActiveTab('dashboard')} 
+                style={{ backgroundColor: activeTab === 'dashboard' ? '#1e3a8a' : 'transparent' }}
+                className={`flex items-center w-full px-5 py-4 rounded-2xl text-sm font-bold transition-all border-none outline-none ${activeTab === 'dashboard' ? '!text-white shadow-md' : '!text-slate-500 hover:bg-fuchsia-50 hover:text-fuchsia-600'}`}
+              >
+                <LayoutDashboard className="w-5 h-5 mr-4 shrink-0" /> <span className="whitespace-nowrap">Dashboard</span>
+              </button>
+              
+              <button 
+                onClick={() => setActiveTab('sessions')} 
+                style={{ backgroundColor: activeTab === 'sessions' ? '#1e3a8a' : 'transparent' }}
+                className={`flex items-center w-full px-5 py-4 rounded-2xl text-sm font-bold transition-all border-none outline-none ${activeTab === 'sessions' ? '!text-white shadow-md' : '!text-slate-500 hover:bg-fuchsia-50 hover:text-fuchsia-600'}`}
+              >
+                <BookOpen className="w-5 h-5 mr-4 shrink-0" /> <span className="whitespace-nowrap">My Sessions</span>
+              </button>
+              
+              <button 
+                onClick={() => setActiveTab('leaderboard')} 
+                style={{ backgroundColor: activeTab === 'leaderboard' ? '#1e3a8a' : 'transparent' }}
+                className={`flex items-center w-full px-5 py-4 rounded-2xl text-sm font-bold transition-all border-none outline-none ${activeTab === 'leaderboard' ? '!text-white shadow-md' : '!text-slate-500 hover:bg-fuchsia-50 hover:text-fuchsia-600'}`}
+              >
+                <Award className="w-5 h-5 mr-4 shrink-0" /> <span className="whitespace-nowrap">Rankings</span>
+              </button>
+              
+              <button 
+                onClick={() => setActiveTab('inbox')} 
+                style={{ backgroundColor: activeTab === 'inbox' ? '#1e3a8a' : 'transparent' }}
+                className={`flex justify-between items-center w-full px-5 py-4 rounded-2xl text-sm font-bold transition-all border-none outline-none ${activeTab === 'inbox' ? '!text-white shadow-md' : '!text-slate-500 hover:bg-fuchsia-50 hover:text-fuchsia-600'}`}
+              >
+                <span className="flex items-center whitespace-nowrap"><Inbox className="w-5 h-5 mr-4 shrink-0" /> Messages</span>
+                {unreadMessagesCount > 0 && <span className={`text-[10px] px-2 py-0.5 rounded-full font-black shrink-0 ${activeTab === 'inbox' ? 'bg-white text-fuchsia-800' : 'bg-rose-500 !text-white animate-pulse'}`}>{unreadMessagesCount}</span>}
+              </button>
+              
+              <button 
+                onClick={() => setActiveTab('settings')} 
+                style={{ backgroundColor: activeTab === 'settings' ? '#1e3a8a' : 'transparent' }}
+                className={`flex items-center w-full px-5 py-4 rounded-2xl text-sm font-bold transition-all border-none outline-none ${activeTab === 'settings' ? '!text-white shadow-md' : '!text-slate-500 hover:bg-fuchsia-50 hover:text-fuchsia-600'}`}
+              >
+                <Settings className="w-5 h-5 mr-4 shrink-0" /> <span className="whitespace-nowrap">Settings</span>
+              </button>
+            </div>
           </div>
           
-          <div className="flex items-center space-x-6 ml-auto">
-            <div className="relative">
-              <button onClick={() => setShowNotifs(!showNotifs)} className={`relative p-4 transition-colors bg-white rounded-2xl shadow-sm border ${showNotifs ? 'text-fuchsia-600 border-fuchsia-200' : 'text-gray-400 border-gray-100 hover:border-fuchsia-100'}`}>
-                <BellRing className="w-6 h-6" />
-                {(totalRequests > 0 || unreadMessagesCount > 0) && <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-rose-500 rounded-full border-2 border-white animate-ping"></span>}
-                {(totalRequests > 0 || unreadMessagesCount > 0) && <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-rose-500 rounded-full border-2 border-white"></span>}
-              </button>
-              {showNotifs && (
-                <div className="absolute top-16 right-0 w-80 bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-5 z-50 animate-in slide-in-from-top-4">
-                   <div className="flex items-center justify-between mb-4 px-2">
-                     <h4 className="font-black text-gray-900 text-lg">Alerts</h4>
-                     <button onClick={() => setShowNotifs(false)} className="text-xs text-fuchsia-600 font-bold hover:underline">Close</button>
-                   </div>
-                   {totalRequests > 0 && (
-                     <div className="p-4 bg-fuchsia-50 rounded-2xl border border-fuchsia-100 mb-3 cursor-pointer hover:bg-fuchsia-100 transition-colors">
-                        <p className="text-sm font-black text-fuchsia-900 flex items-center"><Users className="w-4 h-4 mr-2"/> {totalRequests} Pending Requests</p>
-                        <p className="text-xs font-bold text-fuchsia-600 mt-2 leading-relaxed">You have students waiting to join your sessions. Review them now.</p>
-                     </div>
-                   )}
-                   {unreadMessagesCount > 0 && (
-                     <div onClick={() => {setActiveTab('inbox'); setShowNotifs(false);}} className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 mb-3 cursor-pointer hover:bg-indigo-100 transition-colors">
-                        <p className="text-sm font-black text-indigo-900 flex items-center"><MessageSquare className="w-4 h-4 mr-2"/> {unreadMessagesCount} Unanswered Messages!</p>
-                        <p className="text-xs font-bold text-indigo-600 mt-2 leading-relaxed">Students are waiting for your reply. Check your inbox.</p>
-                     </div>
-                   )}
-                </div>
-              )}
-            </div>
+          <div className="p-6 w-full mt-auto">
+            <button 
+               onClick={handleLogout} 
+               style={{ backgroundColor: '#f9fafb' }}
+               className="flex items-center justify-center w-full px-5 py-4 text-sm !text-slate-500 hover:!text-rose-600 rounded-2xl font-bold transition-all border border-transparent outline-none"
+            >
+              <LogOut className="w-5 h-5 mr-3 shrink-0" /> <span className="whitespace-nowrap">Sign Out</span>
+            </button>
+          </div>
+        </aside>
 
-            <div className="relative">
-              <div onClick={() => setShowProfile(!showProfile)} className={`flex items-center p-2 pr-6 bg-white rounded-[1.5rem] shadow-sm border cursor-pointer hover:shadow-md transition-all ${showProfile ? 'border-fuchsia-300' : 'border-gray-100 hover:border-fuchsia-100'}`}>
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-fuchsia-600 to-indigo-500 flex items-center justify-center text-white font-black text-xl mr-4 shadow-inner overflow-hidden">
-                  {user?.avatar ? <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" /> : (user?.name ? user.name.charAt(0).toUpperCase() : 'M')}
-                </div>
-                <div className="hidden md:block text-left">
-                  <p className="text-sm font-black text-gray-900 leading-tight">{user?.name ? user.name.split(' ')[0] : 'Mentor'}</p>
-                  <p className="text-[10px] text-fuchsia-600 font-bold uppercase tracking-widest mt-0.5">Senior Expert</p>
-                </div>
+        {/* 🟢 MAIN CONTENT AREA */}
+        <main className="flex-1 md:pl-[290px] flex flex-col w-full relative z-10 min-h-screen">
+          
+          <header className="w-full h-28 flex items-center justify-between px-8 sticky top-[68px] z-30 bg-[#F4F7FE]/90 backdrop-blur-md transition-all border-b border-white/50 shadow-sm">
+            
+            {/* 🔴 CONDITIONAL RENDERING FOR SEARCH BAR */}
+            {activeTab === 'dashboard' ? (
+              <div className="relative w-[28rem] hidden sm:block group">
+                <Search className="w-5 h-5 absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-fuchsia-600 transition-colors" />
+                <input type="text" value={globalSearch} onChange={(e) => setGlobalSearch(e.target.value)} placeholder="Search your dashboard..." className="w-full pl-14 pr-4 py-4 bg-white border-2 border-transparent focus:border-fuchsia-200 rounded-2xl outline-none text-sm font-bold text-gray-700 shadow-sm transition-all focus:shadow-md" />
+              </div>
+            ) : (
+              <div></div> /* Empty div to keep flex-between spacing */
+            )}
+            
+            <div className="flex items-center space-x-6 ml-auto">
+              <div className="relative">
+                <button onClick={() => setShowNotifs(!showNotifs)} className={`relative p-4 transition-colors bg-white rounded-2xl shadow-sm border ${showNotifs ? 'text-fuchsia-600 border-fuchsia-200' : 'text-gray-400 border-gray-100 hover:border-fuchsia-100'}`}>
+                  <BellRing className="w-6 h-6" />
+                  {(totalRequests > 0 || unreadMessagesCount > 0) && <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-rose-500 rounded-full border-2 border-white animate-ping"></span>}
+                  {(totalRequests > 0 || unreadMessagesCount > 0) && <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-rose-500 rounded-full border-2 border-white"></span>}
+                </button>
+                {showNotifs && (
+                  <div className="absolute top-16 right-0 w-80 bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-5 z-50 animate-in slide-in-from-top-4">
+                     <div className="flex items-center justify-between mb-4 px-2">
+                       <h4 className="font-black text-gray-900 text-lg">Alerts</h4>
+                       <button onClick={() => setShowNotifs(false)} className="text-xs text-fuchsia-600 font-bold hover:underline">Close</button>
+                     </div>
+                     {totalRequests > 0 && (
+                       <div className="p-4 bg-fuchsia-50 rounded-2xl border border-fuchsia-100 mb-3 cursor-pointer hover:bg-fuchsia-100 transition-colors">
+                          <p className="text-sm font-black text-fuchsia-900 flex items-center"><Users className="w-4 h-4 mr-2"/> {totalRequests} Pending Requests</p>
+                          <p className="text-xs font-bold text-fuchsia-600 mt-2 leading-relaxed">You have students waiting to join your sessions. Review them now.</p>
+                       </div>
+                     )}
+                     {unreadMessagesCount > 0 && (
+                       <div onClick={() => {setActiveTab('inbox'); setShowNotifs(false);}} className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 mb-3 cursor-pointer hover:bg-indigo-100 transition-colors">
+                          <p className="text-sm font-black text-indigo-900 flex items-center"><MessageSquare className="w-4 h-4 mr-2"/> {unreadMessagesCount} Unanswered Messages!</p>
+                          <p className="text-xs font-bold text-indigo-600 mt-2 leading-relaxed">Students are waiting for your reply. Check your inbox.</p>
+                       </div>
+                     )}
+                  </div>
+                )}
               </div>
 
-              {showProfile && (
-                <div className="absolute top-20 right-0 w-64 bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-3 z-50 animate-in slide-in-from-top-4">
-                   <div className="flex items-center p-4 mb-2 bg-gray-50 rounded-2xl">
-                      <div className="w-14 h-14 bg-fuchsia-100 rounded-xl text-fuchsia-600 flex items-center justify-center font-black text-2xl mr-4 overflow-hidden border border-fuchsia-200">
-                        {user?.avatar ? <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" /> : (user?.name ? user.name.charAt(0).toUpperCase() : 'M')}
-                      </div>
-                      <div>
-                        <p className="font-black text-gray-900 leading-tight text-lg truncate w-28">{user?.name ? user.name.split(' ')[0] : 'Mentor'}</p>
-                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Verified Tier</p>
-                      </div>
-                   </div>
-                   <div className="px-2 pb-2">
-                     <button onClick={() => {setActiveTab('settings'); setShowProfile(false);}} className="w-full text-left px-4 py-3 rounded-xl text-gray-700 font-bold hover:bg-fuchsia-50 hover:text-fuchsia-600 transition-colors flex items-center text-sm">
-                        <User className="w-4 h-4 mr-3" /> Mentor Profile
-                     </button>
-                   </div>
-                   <hr className="border-gray-100 mb-2" />
-                   <button onClick={handleLogout} className="w-full text-left px-5 py-4 rounded-xl text-rose-600 font-black hover:bg-rose-50 transition-colors flex items-center text-sm">
-                      <LogOut className="w-5 h-5 mr-3" /> Secure Log Out
-                   </button>
+              <div className="relative">
+                <div onClick={() => setShowProfile(!showProfile)} className={`flex items-center p-2 pr-6 bg-white rounded-[1.5rem] shadow-sm border cursor-pointer hover:shadow-md transition-all ${showProfile ? 'border-fuchsia-300' : 'border-gray-100 hover:border-fuchsia-100'}`}>
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-fuchsia-600 to-indigo-500 flex items-center justify-center text-white font-black text-xl mr-4 shadow-inner overflow-hidden">
+                    {user?.avatar ? <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" /> : (user?.name ? user.name.charAt(0).toUpperCase() : 'M')}
+                  </div>
+                  <div className="hidden md:block text-left">
+                    <p className="text-sm font-black text-gray-900 leading-tight">{user?.name ? user.name.split(' ')[0] : 'Mentor'}</p>
+                    <p className="text-[10px] text-fuchsia-600 font-bold uppercase tracking-widest mt-0.5">Senior Expert</p>
+                  </div>
                 </div>
-              )}
+
+                {showProfile && (
+                  <div className="absolute top-20 right-0 w-64 bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-3 z-50 animate-in slide-in-from-top-4">
+                     <div className="flex items-center p-4 mb-2 bg-gray-50 rounded-2xl">
+                        <div className="w-14 h-14 bg-fuchsia-100 rounded-xl text-fuchsia-600 flex items-center justify-center font-black text-2xl mr-4 overflow-hidden border border-fuchsia-200">
+                          {user?.avatar ? <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" /> : (user?.name ? user.name.charAt(0).toUpperCase() : 'M')}
+                        </div>
+                        <div>
+                          <p className="font-black text-gray-900 leading-tight text-lg truncate w-28">{user?.name ? user.name.split(' ')[0] : 'Mentor'}</p>
+                          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Verified Tier</p>
+                        </div>
+                     </div>
+                     <div className="px-2 pb-2">
+                       <button onClick={() => {setActiveTab('settings'); setShowProfile(false);}} className="w-full text-left px-4 py-3 rounded-xl text-gray-700 font-bold hover:bg-fuchsia-50 hover:text-fuchsia-600 transition-colors flex items-center text-sm">
+                          <User className="w-4 h-4 mr-3" /> Mentor Profile
+                       </button>
+                     </div>
+                     <hr className="border-gray-100 mb-2" />
+                     <button onClick={handleLogout} className="w-full text-left px-5 py-4 rounded-xl text-rose-600 font-black hover:bg-rose-50 transition-colors flex items-center text-sm">
+                        <LogOut className="w-5 h-5 mr-3" /> Secure Log Out
+                     </button>
+                  </div>
+                )}
+              </div>
             </div>
+          </header>
+
+          <div className="p-8 pt-6 max-w-7xl mx-auto w-full relative pb-20">
+            {activeTab === 'dashboard' && renderDashboard()}
+            {activeTab === 'sessions' && renderSessions()}
+            {activeTab === 'leaderboard' && renderLeaderboard()}
+            {activeTab === 'inbox' && renderInbox()}
+            {activeTab === 'settings' && renderSettings()}
           </div>
-        </header>
+        </main>
+      </div>
 
-        <div className="p-8 pt-0 max-w-7xl mx-auto w-full pb-20 relative">
-          {activeTab === 'dashboard' && renderDashboard()}
-          {activeTab === 'sessions' && renderSessions()}
-          {activeTab === 'leaderboard' && renderLeaderboard()}
-          {activeTab === 'inbox' && renderInbox()}
-          {activeTab === 'settings' && renderSettings()}
-        </div>
-      </main>
+      {/* Final Global Footer */}
+      <div className="w-full relative z-[200]">
+        <Footer />
+      </div>
 
-      {/* 🔴 CREATE SESSION MODAL */}
+      {/* Modals */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0f172a]/60 backdrop-blur-md transition-all">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-[#0f172a]/60 backdrop-blur-md transition-all">
           <div className="bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.3)] w-full max-w-lg max-h-[90vh] overflow-y-auto border border-white/40 transform transition-all scale-100 opacity-100 no-scrollbar">
             <div className="relative p-8 bg-gradient-to-br from-fuchsia-600 to-indigo-700 text-white text-left overflow-hidden">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full mix-blend-overlay filter blur-[50px] opacity-20"></div>
@@ -1719,7 +1784,6 @@ const SeniorDashboard = () => {
                   <input type="url" required value={formData.session_link} onChange={(e) => setFormData({...formData, session_link: e.target.value})} placeholder="https://youtube.com/watch?v=..." className="w-full px-5 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:border-rose-400 outline-none transition-all font-bold text-rose-600 placeholder-gray-400" />
                 </div>
                 
-                {/* 🔴 Premium Optional Quiz Field with Toggle */}
                 <div className={`p-5 rounded-2xl border-2 transition-all duration-300 ${showQuizInput ? 'bg-fuchsia-50/50 border-fuchsia-200' : 'bg-gray-50 border-gray-100'}`}>
                   <div className="flex items-center justify-between cursor-pointer" onClick={() => { setShowQuizInput(!showQuizInput); if(showQuizInput) setFormData({...formData, quiz_link: ''}); }}>
                     <div>
@@ -1736,7 +1800,6 @@ const SeniorDashboard = () => {
                     </div>
                   )}
                 </div>
-
               </div>
               <div className="mt-8 flex space-x-4">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-black rounded-2xl transition-colors border border-gray-200">Cancel</button>
@@ -1749,7 +1812,7 @@ const SeniorDashboard = () => {
 
       {/* 🔴 SET TIMER MODAL (Fully Functional) */}
       {timerModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0f172a]/60 backdrop-blur-md transition-all">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-[#0f172a]/60 backdrop-blur-md transition-all">
           <div className="bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.3)] w-full max-w-md overflow-hidden border border-white/40 transform transition-all scale-100 opacity-100">
             <div className="relative p-8 bg-gradient-to-br from-indigo-900 to-slate-900 text-white text-left overflow-hidden">
               <div className="absolute top-0 right-0 w-40 h-40 bg-fuchsia-500 rounded-full mix-blend-overlay filter blur-[50px] opacity-30"></div>
@@ -1788,7 +1851,7 @@ const SeniorDashboard = () => {
 
       {/* 🔴 EDIT SESSION MODAL */}
       {editModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0f172a]/70 backdrop-blur-md transition-all">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-[#0f172a]/70 backdrop-blur-md transition-all">
           <div className="bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.5)] w-full max-w-lg max-h-[90vh] overflow-y-auto border border-indigo-500/30 transform transition-all scale-100 opacity-100 no-scrollbar">
             <div className="relative p-8 bg-gradient-to-br from-indigo-900 to-slate-900 text-white text-left overflow-hidden">
               <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500 rounded-full mix-blend-overlay filter blur-[50px] opacity-30"></div>
@@ -1852,7 +1915,7 @@ const SeniorDashboard = () => {
 
       {/* 🟢 MANAGE STUDENTS MODAL */}
       {manageModal.isOpen && manageModal.group && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0f172a]/60 backdrop-blur-md transition-all">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-[#0f172a]/60 backdrop-blur-md transition-all">
           <div className="bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.3)] w-full max-w-lg overflow-hidden border border-white/40 transform transition-all scale-100 opacity-100">
             <div className="relative p-8 bg-gradient-to-br from-gray-900 to-gray-800 text-white text-left overflow-hidden">
               <div className="absolute top-0 right-0 w-40 h-40 bg-fuchsia-500 rounded-full mix-blend-overlay filter blur-[50px] opacity-20"></div>

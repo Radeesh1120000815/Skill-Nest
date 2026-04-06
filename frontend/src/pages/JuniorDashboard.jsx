@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { 
   BookOpen, Calendar, Users, Award, 
   LogOut, Bell, Search, PlayCircle, Star, Clock, 
@@ -161,7 +163,6 @@ const JuniorDashboard = () => {
         bio: localExtras.bio || ''
       }));
 
-      // 🔴 UPDATE: Added config (with token) to these requests to fix 401 error
       const groupRes = await axios.get('http://localhost:5001/api/groups', config);
       setGroups(groupRes.data.reverse());
 
@@ -181,7 +182,6 @@ const JuniorDashboard = () => {
 
   const handleJoinGroup = async (groupId) => {
     try {
-      // 🔴 UPDATE: Added config here as well, just in case groups endpoint is protected
       const userInfoStr = localStorage.getItem('userInfo');
       const token = userInfoStr ? JSON.parse(userInfoStr).token : '';
       const config = { headers: { Authorization: `Bearer ${token}` } };
@@ -204,7 +204,6 @@ const JuniorDashboard = () => {
     if(!confirmDrop) return;
 
     try {
-      // 🔴 UPDATE: Added config here
       const userInfoStr = localStorage.getItem('userInfo');
       const token = userInfoStr ? JSON.parse(userInfoStr).token : '';
       const config = { headers: { Authorization: `Bearer ${token}` } };
@@ -264,7 +263,7 @@ const JuniorDashboard = () => {
         type: contactModal.type || 'Question',
         text: contactModal.message,
         timestamp: new Date().toISOString(),
-        replies: [], // Initialize continuous chat array
+        replies: [], 
         readByJunior: true,
         readBySenior: false
       };
@@ -307,7 +306,7 @@ const JuniorDashboard = () => {
         return {
           ...m,
           replies: [...(m.replies || []), newReply],
-          readBySenior: false, // Notify Senior
+          readBySenior: false,
           readByJunior: true 
         };
       }
@@ -319,7 +318,6 @@ const JuniorDashboard = () => {
     setReplyText('');
   };
 
-  // 🔴 MESSAGE CRUD LOGIC
   const startEditingMessage = (msg) => {
     setEditingMsgId(msg.id);
     setEditingText(msg.text);
@@ -343,7 +341,6 @@ const JuniorDashboard = () => {
     localStorage.setItem('platformMessages', JSON.stringify(updated));
   };
 
-  // Junior Edit Thread Reply
   const handleEditThreadReply = (threadId, replyId, newText) => {
     if(!newText.trim()) return;
     const updatedMessages = platformMessages.map(m => {
@@ -359,7 +356,6 @@ const JuniorDashboard = () => {
     setEditingText('');
   }
 
-  // Junior Delete Thread Reply
   const handleDeleteThreadReply = (threadId, replyId) => {
       const confirmDel = window.confirm("🗑️ Are you sure you want to delete this specific reply?");
       if(!confirmDel) return;
@@ -430,7 +426,6 @@ const JuniorDashboard = () => {
   };
 
   const myMessages = platformMessages.filter(m => m.senderId === user?._id).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-  // Notification Count Logic for Junior
   const unreadRepliesCount = myMessages.filter(m => m.readByJunior === false || (m.readByJunior === undefined && m.reply !== null)).length;
   
   // 🔴 DYNAMIC XP CALCULATION FOR JUNIOR
@@ -441,7 +436,6 @@ const JuniorDashboard = () => {
   const nextMilestone = currentLevel * 1000;
   const xpProgress = Math.min(100, ((calculatedXP % 1000) / 1000) * 100);
 
-  // Helper to compile thread history including legacy replies
   const getThread = (msg) => {
     let thread = [];
     if (msg.reply && (!msg.replies || msg.replies.length === 0)) {
@@ -453,7 +447,6 @@ const JuniorDashboard = () => {
     return thread;
   };
 
-  // 🔴 EXACT SENIOR DASHBOARD LOGIC FOR MENTOR LEADERBOARD (Synced index deduction)
   const getCalculatedMentorXP = (mentor) => {
      const baseXP = mentor.points || 0;
      const hosted = groups.filter(g => g.senior_id?._id === mentor._id || g.senior_id === mentor._id).length;
@@ -462,7 +455,6 @@ const JuniorDashboard = () => {
   };
 
   const globalRankedMentors = [...mentors].map((mentor, index) => {
-     // EXACT same index deduction as Senior Dashboard
      const xp = getCalculatedMentorXP(mentor) - (index * 340);
      return { 
        ...mentor,
@@ -661,7 +653,7 @@ const JuniorDashboard = () => {
                         <X className="w-5 h-5 mr-2" /> Class Full
                       </div>
                     ) : (
-                      <button onClick={() => handleJoinGroup(group._id)} className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center group-hover/card:scale-105">
+                      <button onClick={() => handleJoinGroup(group._id)} className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center group-hover/card:scale-105">
                         Enroll Now <ChevronRight className="w-5 h-5 ml-2 group-hover/btn:translate-x-1 transition-transform" />
                       </button>
                     )}
@@ -759,7 +751,7 @@ const JuniorDashboard = () => {
   // ---------------------------------------------------------
   const renderInbox = () => (
     <div className="animate-in slide-in-from-right-8 duration-500 text-left space-y-8 max-w-5xl mx-auto">
-      <div className="bg-gradient-to-r from-[#0f172a] to-blue-900 rounded-[2.5rem] p-10 text-white shadow-xl relative overflow-hidden flex items-center">
+      <div className="bg-gradient-to-r from-[#0f172a] to-blue-900 rounded-[3rem] p-10 text-white shadow-xl relative overflow-hidden flex items-center">
          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full mix-blend-overlay filter blur-[40px]"></div>
          <div className="w-24 h-24 bg-white/10 rounded-[2rem] flex items-center justify-center mr-8 border border-white/20 backdrop-blur-md">
             <Inbox className="w-12 h-12 text-cyan-300" />
@@ -770,7 +762,7 @@ const JuniorDashboard = () => {
          </div>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-8 min-h-[500px]">
+      <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 p-8 min-h-[500px]">
         {myMessages.length > 0 ? (
           <div className="space-y-8">
             {myMessages.map(msg => {
@@ -786,7 +778,7 @@ const JuniorDashboard = () => {
                     <span className="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded-lg border border-blue-100 mr-4">
                       {msg.type}
                     </span>
-                    <p className="text-xs font-bold text-slate-400">Conversation with <span className="text-slate-800 font-black">{msg.receiverName}</span></p>
+                    <p className="text-xs font-bold text-slate-400">Message to <span className="text-slate-800 font-black">{msg.receiverName}</span></p>
                   </div>
                   <div className="flex items-center space-x-3">
                      {unread && (
@@ -967,7 +959,7 @@ const JuniorDashboard = () => {
   // ---------------------------------------------------------
   const renderSchedule = () => (
     <div className="animate-in slide-in-from-right-8 duration-500 text-left space-y-8 max-w-6xl mx-auto">
-      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-[2.5rem] p-12 text-white shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between">
+      <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 rounded-[2.5rem] p-12 text-white shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between">
          <div className="absolute -top-20 -right-20 w-80 h-80 bg-white/10 rounded-full mix-blend-overlay filter blur-[50px] animate-pulse"></div>
          <div className="relative z-10">
             <h3 className="text-5xl font-black mb-4 tracking-tight">My Learning Path</h3>
@@ -1018,15 +1010,21 @@ const JuniorDashboard = () => {
 
     return (
       <div className="animate-in slide-in-from-right-8 duration-500 text-left space-y-8 max-w-7xl mx-auto relative">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100 relative overflow-hidden">
-          <div className="absolute right-0 top-0 w-64 h-64 bg-blue-50 rounded-bl-full -z-10"></div>
+        {/* 🔵 UPDATE: Changed from bg-white to bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900, and added text-white */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 p-10 rounded-[2.5rem] shadow-sm border border-white/10 relative overflow-hidden">
+          {/* 🔵 UPDATE: Changed bg-blue-50 to bg-cyan-500/20 for better contrast on dark background */}
+          <div className="absolute right-0 top-0 w-64 h-64 bg-cyan-500/20 rounded-bl-full -z-10"></div>
           <div>
-            <h3 className="text-4xl font-black text-slate-900 mb-3 flex items-center"><Users className="w-10 h-10 mr-4 text-blue-600" /> Industry Experts</h3>
-            <p className="text-slate-500 font-medium text-lg">Connect, learn, and grow with verified professionals.</p>
+            {/* 🔵 UPDATE: Changed text-slate-900 to text-white, and icon text color from text-blue-600 to text-cyan-300 */}
+            <h3 className="text-4xl font-black text-white mb-3 flex items-center"><Users className="w-10 h-10 mr-4 text-cyan-300" /> Industry Experts</h3>
+            {/* 🔵 UPDATE: Changed text-slate-500 to text-blue-100 */}
+            <p className="text-blue-100 font-medium text-lg">Connect, learn, and grow with verified professionals.</p>
           </div>
           <div className="relative w-full md:w-[400px]">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-            <input type="text" value={mentorSearch} onChange={(e) => setMentorSearch(e.target.value)} placeholder="Search expert by name..." className="w-full pl-14 pr-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-2xl outline-none focus:bg-white focus:border-blue-500 font-bold transition-all shadow-inner text-slate-900" />
+            {/* 🔵 UPDATE: Changed text-slate-400 to text-blue-200 */}
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-blue-200 w-5 h-5" />
+            {/* 🔵 UPDATE: Restyled input for a dark background: changed bg-slate-50, text color, and placeholder color */}
+            <input type="text" value={mentorSearch} onChange={(e) => setMentorSearch(e.target.value)} placeholder="Search expert by name..." className="w-full pl-14 pr-4 py-4 bg-white/10 border-2 border-white/20 rounded-2xl outline-none focus:bg-white/20 focus:border-cyan-300 font-bold transition-all shadow-inner text-white placeholder-blue-200" />
           </div>
         </div>
 
@@ -1072,7 +1070,7 @@ const JuniorDashboard = () => {
 
         {/* 🔴 CONTACT MENTOR MODAL */}
         {contactModal.isOpen && contactModal.mentor && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0f172a]/70 backdrop-blur-md transition-all">
+          <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-[#0f172a]/70 backdrop-blur-md transition-all">
             <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 border border-white/20">
               {!msgSuccess ? (
                 <>
@@ -1094,7 +1092,7 @@ const JuniorDashboard = () => {
                       <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Message Type</label>
                       <div className="flex bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
                         {['Question', 'Feedback', '1-on-1 Request'].map(type => (
-                          <button key={type} type="button" onClick={() => setContactModal({...contactModal, type})} className={`flex-1 py-2.5 text-xs font-black rounded-xl transition-all ${contactModal.type === type ? 'bg-blue-50 text-blue-600 shadow-sm border border-blue-100' : 'text-slate-500 hover:bg-slate-50'}`}>
+                          <button key={type} type="button" onClick={() => setContactModal({...contactModal, type})} className={`flex-1 py-2.5 text-xs font-black rounded-xl transition-all border-none outline-none ${contactModal.type === type ? 'bg-blue-50 text-blue-600 shadow-sm border border-blue-100' : 'bg-transparent text-slate-500 hover:bg-slate-50'}`}>
                             {type === 'Question' ? '🤔' : type === 'Feedback' ? '⭐' : '📅'} {type.split(' ')[0]}
                           </button>
                         ))}
@@ -1256,9 +1254,27 @@ const JuniorDashboard = () => {
 
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="w-full lg:w-72 space-y-3">
-          <button onClick={() => setSettingsTab('profile')} className={`w-full flex items-center px-6 py-5 rounded-[1.5rem] font-black transition-all ${settingsTab === 'profile' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 translate-x-2' : 'bg-white text-slate-500 hover:bg-blue-50 border border-slate-100'}`}><User className="w-5 h-5 mr-4" /> Personal Info</button>
-          <button onClick={() => setSettingsTab('security')} className={`w-full flex items-center px-6 py-5 rounded-[1.5rem] font-black transition-all ${settingsTab === 'security' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 translate-x-2' : 'bg-white text-slate-500 hover:bg-blue-50 border border-slate-100'}`}><Key className="w-5 h-5 mr-4" /> Security & Password</button>
-          <button onClick={() => setSettingsTab('notifications')} className={`w-full flex items-center px-6 py-5 rounded-[1.5rem] font-black transition-all ${settingsTab === 'notifications' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 translate-x-2' : 'bg-white text-slate-500 hover:bg-blue-50 border border-slate-100'}`}><BellRing className="w-5 h-5 mr-4" /> Notifications</button>
+          <button 
+             onClick={() => setSettingsTab('profile')} 
+             style={{ backgroundColor: settingsTab === 'profile' ? '#1e3a8a' : 'transparent' }}
+             className={`w-full flex items-center px-6 py-5 rounded-[1.5rem] font-black transition-all border-none outline-none ${settingsTab === 'profile' ? 'text-white shadow-md translate-x-2' : 'text-slate-500 hover:bg-blue-50 border border-slate-100'}`}
+          >
+             <User className="w-5 h-5 mr-4" /> Personal Info
+          </button>
+          <button 
+             onClick={() => setSettingsTab('security')} 
+             style={{ backgroundColor: settingsTab === 'security' ? '#1e3a8a' : 'transparent' }}
+             className={`w-full flex items-center px-6 py-5 rounded-[1.5rem] font-black transition-all border-none outline-none ${settingsTab === 'security' ? 'text-white shadow-md translate-x-2' : 'text-slate-500 hover:bg-blue-50 border border-slate-100'}`}
+          >
+             <Key className="w-5 h-5 mr-4" /> Security & Password
+          </button>
+          <button 
+             onClick={() => setSettingsTab('notifications')} 
+             style={{ backgroundColor: settingsTab === 'notifications' ? '#1e3a8a' : 'transparent' }}
+             className={`w-full flex items-center px-6 py-5 rounded-[1.5rem] font-black transition-all border-none outline-none ${settingsTab === 'notifications' ? 'text-white shadow-md translate-x-2' : 'text-slate-500 hover:bg-blue-50 border border-slate-100'}`}
+          >
+             <BellRing className="w-5 h-5 mr-4" /> Notifications
+          </button>
         </div>
 
         <div className="flex-1 bg-white rounded-[3rem] shadow-sm border border-slate-100 p-10 relative overflow-hidden">
@@ -1330,141 +1346,181 @@ const JuniorDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex font-sans text-slate-800 selection:bg-blue-100 selection:text-blue-900">
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans text-slate-800 selection:bg-blue-100 selection:text-blue-900">
       
-      {/* 🟢 PREMIUM SIDEBAR */}
-      <aside className="w-64 fixed h-[calc(100vh-2rem)] my-4 ml-4 bg-white/80 backdrop-blur-xl rounded-[3rem] hidden md:flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] z-20 overflow-hidden border border-white">
-        <div>
-          <div className="h-28 flex items-center px-8">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-violet-600 rounded-2xl flex items-center justify-center mr-4 shadow-xl shadow-blue-200">
-              <Zap className="w-7 h-7 text-white fill-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">Kuppi</h1>
-              <h1 className="text-xl font-bold text-blue-600 tracking-wide leading-none">Space.</h1>
-            </div>
-          </div>
-          <nav className="p-5 space-y-3 text-left">
-            <button onClick={() => setActiveTab('dashboard')} className={`flex items-center w-full px-5 py-4 rounded-2xl font-bold transition-all ${activeTab === 'dashboard' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-slate-500 hover:bg-blue-50 hover:text-blue-600'}`}>
-              <LayoutDashboard className="w-5 h-5 mr-3" /> Dashboard
-            </button>
-            <button onClick={() => setActiveTab('schedule')} className={`flex items-center w-full px-5 py-4 rounded-2xl font-bold transition-all ${activeTab === 'schedule' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-slate-500 hover:bg-blue-50 hover:text-blue-600'}`}>
-              <BookOpen className="w-5 h-5 mr-3" /> My Path
-            </button>
-            <button onClick={() => setActiveTab('mentors')} className={`flex items-center w-full px-5 py-4 rounded-2xl font-bold transition-all ${activeTab === 'mentors' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-slate-500 hover:bg-blue-50 hover:text-blue-600'}`}>
-              <UserCheck className="w-5 h-5 mr-3" /> Mentors
-            </button>
-            <button onClick={() => setActiveTab('leaderboard')} className={`flex items-center w-full px-5 py-4 rounded-2xl font-bold transition-all ${activeTab === 'leaderboard' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-slate-500 hover:bg-blue-50 hover:text-blue-600'}`}>
-              <Award className="w-5 h-5 mr-3" /> Rankings
-            </button>
-            {/* 🔴 INBOX TAB IN SIDEBAR */}
-            <button onClick={() => setActiveTab('inbox')} className={`flex justify-between items-center w-full px-5 py-4 rounded-2xl font-bold transition-all ${activeTab === 'inbox' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-slate-500 hover:bg-blue-50 hover:text-blue-600'}`}>
-              <span className="flex items-center"><Inbox className="w-5 h-5 mr-3" /> Messages</span>
-              {unreadRepliesCount > 0 && <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${activeTab === 'inbox' ? 'bg-white text-blue-600' : 'bg-rose-500 text-white animate-pulse'}`}>{unreadRepliesCount}</span>}
-            </button>
-            <button onClick={() => setActiveTab('settings')} className={`flex items-center w-full px-5 py-4 rounded-2xl font-bold transition-all ${activeTab === 'settings' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-slate-500 hover:bg-blue-50 hover:text-blue-600'}`}>
-              <Settings className="w-5 h-5 mr-3" /> Settings
-            </button>
-          </nav>
-        </div>
-        <div className="p-5">
-          <button onClick={handleLogout} className="flex items-center justify-center w-full px-5 py-4 text-slate-500 bg-slate-50 hover:bg-rose-50 hover:text-rose-600 rounded-2xl font-bold transition-all border border-transparent hover:border-rose-100">
-            <LogOut className="w-5 h-5 mr-2" /> Sign Out
-          </button>
-        </div>
-      </aside>
+      {/* Top Global Navbar */}
+      <div className="w-full z-[200] relative">
+        <Navbar />
+      </div>
 
-      <main className="flex-1 md:ml-[18rem] flex flex-col min-h-screen">
-        <header className="h-28 flex items-center justify-between px-8 sticky top-0 z-30 bg-[#f8fafc]/90 backdrop-blur-2xl transition-all">
-          <div className="relative w-[28rem] hidden sm:block group">
-            <Search className="w-5 h-5 absolute left-5 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-            <input type="text" value={exploreSearch} onChange={handleGlobalSearch} placeholder="Search anything across the platform..." className="w-full pl-14 pr-4 py-4 bg-white border-2 border-transparent focus:border-blue-200 rounded-2xl outline-none text-sm font-bold text-slate-700 shadow-sm transition-all focus:shadow-md" />
-          </div>
-          
-          <div className="flex items-center space-x-6 ml-auto">
-            <div className="hidden lg:flex items-center px-5 py-3 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-100 rounded-2xl shadow-sm cursor-help hover:scale-105 transition-transform">
-              <Flame className="w-5 h-5 text-orange-500 mr-2 animate-pulse" />
-              <span className="text-sm font-black text-orange-700">5 Day Streak!</span>
-            </div>
+      {/* Main Layout Container */}
+      <div className="flex flex-1 w-full relative">
 
-            <div className="relative">
-              <button onClick={() => setShowNotifs(!showNotifs)} className={`relative p-4 transition-colors bg-white rounded-2xl shadow-sm border ${showNotifs ? 'text-blue-600 border-blue-200' : 'text-slate-400 border-slate-100 hover:border-blue-100'}`}>
-                <BellRing className="w-6 h-6" />
-                {unreadRepliesCount > 0 && <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-rose-500 rounded-full border-2 border-white animate-ping"></span>}
-                {unreadRepliesCount > 0 && <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-rose-500 rounded-full border-2 border-white"></span>}
+        {/* 🟢 PREMIUM SIDEBAR */}
+        <aside className="fixed top-[84px] left-0 h-[calc(100vh-100px)] w-[260px] ml-6 bg-white/90 backdrop-blur-xl rounded-[2.5rem] hidden md:flex flex-col justify-between shadow-[0_10px_40px_rgba(0,0,0,0.04)] z-40 border border-white py-6">
+          <div className="flex flex-col w-full">
+            
+            {/* 🔴 Used style objects instead of classes to prevent external CSS interference */}
+            <div className="flex flex-col w-full px-5 gap-2 mt-4">
+              <button 
+                onClick={() => setActiveTab('dashboard')} 
+                style={{ backgroundColor: activeTab === 'dashboard' ? '#1e3a8a' : 'transparent' }}
+                className={`flex items-center w-full px-5 py-4 rounded-2xl text-sm font-bold transition-all border-none outline-none ${activeTab === 'dashboard' ? '!text-white shadow-md' : '!text-slate-500 hover:bg-blue-50 hover:text-blue-600'}`}
+              >
+                <LayoutDashboard className="w-5 h-5 mr-4 shrink-0" /> <span className="whitespace-nowrap">Dashboard</span>
               </button>
               
-              {showNotifs && (
-                <div className="absolute top-16 right-0 w-80 bg-white rounded-[2rem] shadow-2xl border border-slate-100 p-5 z-50 animate-in slide-in-from-top-4">
-                   <div className="flex items-center justify-between mb-4 px-2">
-                     <h4 className="font-black text-slate-900 text-lg">Alerts</h4>
-                     <button onClick={() => setShowNotifs(false)} className="text-xs text-blue-600 font-bold hover:underline">Close</button>
-                   </div>
-                   {unreadRepliesCount > 0 ? (
-                     <div onClick={() => {setActiveTab('inbox'); setShowNotifs(false);}} className="p-4 bg-blue-50 rounded-2xl border border-blue-100 mb-3 cursor-pointer hover:bg-blue-100 transition-colors">
-                        <p className="text-sm font-black text-blue-900 flex items-center"><MessageSquare className="w-4 h-4 mr-2"/> {unreadRepliesCount} New Mentor Replies!</p>
-                        <p className="text-xs font-bold text-blue-600 mt-2 leading-relaxed">Click here to read your messages in the Inbox.</p>
-                     </div>
-                   ) : (
-                     <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors">
-                        <p className="text-sm font-black text-slate-800 flex items-center"><Sparkles className="w-4 h-4 mr-2 text-amber-500"/> Welcome to Kuppi Space!</p>
-                        <p className="text-xs font-bold text-slate-500 mt-2 leading-relaxed">You're all caught up on your notifications.</p>
-                     </div>
-                   )}
-                </div>
-              )}
-            </div>
-
-            <div className="relative">
-              <div onClick={() => setShowProfile(!showProfile)} className={`flex items-center p-2 pr-6 bg-white rounded-[1.5rem] shadow-sm border cursor-pointer hover:shadow-md transition-all ${showProfile ? 'border-blue-300' : 'border-slate-100 hover:border-blue-100'}`}>
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-600 to-violet-500 flex items-center justify-center text-white font-black text-xl mr-4 shadow-inner overflow-hidden">
-                  {user?.avatar ? <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" /> : (user?.name ? user.name.charAt(0).toUpperCase() : 'U')}
-                </div>
-                <div className="hidden md:block text-left">
-                  <p className="text-sm font-black text-slate-900 leading-tight">{user?.name ? user.name.split(' ')[0] : 'Student'}</p>
-                  <p className="text-[10px] text-blue-600 font-bold uppercase tracking-widest mt-0.5">Learner</p>
-                </div>
-              </div>
-
-              {showProfile && (
-                <div className="absolute top-20 right-0 w-64 bg-white rounded-[2rem] shadow-2xl border border-slate-100 p-3 z-50 animate-in slide-in-from-top-4">
-                   <div className="flex items-center p-4 mb-2 bg-slate-50 rounded-2xl">
-                      <div className="w-14 h-14 bg-blue-100 rounded-xl text-blue-600 flex items-center justify-center font-black text-2xl mr-4 overflow-hidden border border-blue-200">
-                        {user?.avatar ? <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" /> : (user?.name ? user.name.charAt(0).toUpperCase() : 'U')}
-                      </div>
-                      <div>
-                        <p className="font-black text-slate-900 leading-tight text-lg truncate w-28">{user?.name ? user.name.split(' ')[0] : 'Student'}</p>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Free Tier</p>
-                      </div>
-                   </div>
-                   <div className="px-2 pb-2">
-                     <button onClick={() => {setActiveTab('settings'); setShowProfile(false);}} className="w-full text-left px-4 py-3 rounded-xl text-slate-700 font-bold hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center text-sm">
-                        <User className="w-4 h-4 mr-3" /> My Profile
-                     </button>
-                   </div>
-                   <hr className="border-slate-100 mb-2" />
-                   <button onClick={handleLogout} className="w-full text-left px-5 py-4 rounded-xl text-rose-600 font-black hover:bg-rose-50 transition-colors flex items-center text-sm">
-                      <LogOut className="w-5 h-5 mr-3" /> Secure Log Out
-                   </button>
-                </div>
-              )}
+              <button 
+                onClick={() => setActiveTab('schedule')} 
+                style={{ backgroundColor: activeTab === 'schedule' ? '#1e3a8a' : 'transparent' }}
+                className={`flex items-center w-full px-5 py-4 rounded-2xl text-sm font-bold transition-all border-none outline-none ${activeTab === 'schedule' ? '!text-white shadow-md' : '!text-slate-500 hover:bg-blue-50 hover:text-blue-600'}`}
+              >
+                <BookOpen className="w-5 h-5 mr-4 shrink-0" /> <span className="whitespace-nowrap">My Path</span>
+              </button>
+              
+              <button 
+                onClick={() => setActiveTab('mentors')} 
+                style={{ backgroundColor: activeTab === 'mentors' ? '#1e3a8a' : 'transparent' }}
+                className={`flex items-center w-full px-5 py-4 rounded-2xl text-sm font-bold transition-all border-none outline-none ${activeTab === 'mentors' ? '!text-white shadow-md' : '!text-slate-500 hover:bg-blue-50 hover:text-blue-600'}`}
+              >
+                <UserCheck className="w-5 h-5 mr-4 shrink-0" /> <span className="whitespace-nowrap">Mentors</span>
+              </button>
+              
+              <button 
+                onClick={() => setActiveTab('leaderboard')} 
+                style={{ backgroundColor: activeTab === 'leaderboard' ? '#1e3a8a' : 'transparent' }}
+                className={`flex items-center w-full px-5 py-4 rounded-2xl text-sm font-bold transition-all border-none outline-none ${activeTab === 'leaderboard' ? '!text-white shadow-md' : '!text-slate-500 hover:bg-blue-50 hover:text-blue-600'}`}
+              >
+                <Award className="w-5 h-5 mr-4 shrink-0" /> <span className="whitespace-nowrap">Rankings</span>
+              </button>
+              
+              <button 
+                onClick={() => setActiveTab('inbox')} 
+                style={{ backgroundColor: activeTab === 'inbox' ? '#1e3a8a' : 'transparent' }}
+                className={`flex justify-between items-center w-full px-5 py-4 rounded-2xl text-sm font-bold transition-all border-none outline-none ${activeTab === 'inbox' ? '!text-white shadow-md' : '!text-slate-500 hover:bg-blue-50 hover:text-blue-600'}`}
+              >
+                <span className="flex items-center whitespace-nowrap"><Inbox className="w-5 h-5 mr-4 shrink-0" /> Messages</span>
+                {unreadRepliesCount > 0 && <span className={`text-[10px] px-2 py-0.5 rounded-full font-black shrink-0 ${activeTab === 'inbox' ? 'bg-white text-blue-600' : 'bg-rose-500 text-white animate-pulse'}`}>{unreadRepliesCount}</span>}
+              </button>
+              
+              <button 
+                onClick={() => setActiveTab('settings')} 
+                style={{ backgroundColor: activeTab === 'settings' ? '#1e3a8a' : 'transparent' }}
+                className={`flex items-center w-full px-5 py-4 rounded-2xl text-sm font-bold transition-all border-none outline-none ${activeTab === 'settings' ? '!text-white shadow-md' : '!text-slate-500 hover:bg-blue-50 hover:text-blue-600'}`}
+              >
+                <Settings className="w-5 h-5 mr-4 shrink-0" /> <span className="whitespace-nowrap">Settings</span>
+              </button>
             </div>
           </div>
-        </header>
+          
+          <div className="p-6 w-full mt-auto">
+            <button 
+               onClick={handleLogout} 
+               style={{ backgroundColor: '#f8fafc' }}
+               className="flex items-center justify-center w-full px-5 py-4 text-sm !text-slate-500 hover:!text-rose-600 rounded-2xl font-bold transition-all border border-transparent outline-none"
+            >
+              <LogOut className="w-5 h-5 mr-3 shrink-0" /> <span className="whitespace-nowrap">Sign Out</span>
+            </button>
+          </div>
+        </aside>
 
-        <div className="p-8 pt-0 max-w-7xl mx-auto w-full pb-20 relative">
-          {activeTab === 'dashboard' && renderDashboard()}
-          {activeTab === 'schedule' && renderSchedule()}
-          {activeTab === 'mentors' && renderMentors()}
-          {activeTab === 'leaderboard' && renderLeaderboard()}
-          {activeTab === 'inbox' && renderInbox()}
-          {activeTab === 'settings' && renderSettings()}
-        </div>
-      </main>
+        <main className="flex-1 md:pl-[290px] flex flex-col w-full relative z-10 min-h-screen">
+          <header className="h-28 flex items-center justify-between px-8 sticky top-[68px] z-30 bg-[#f8fafc]/90 backdrop-blur-md transition-all border-b border-slate-200/50 shadow-sm">
+            <div className="relative w-[28rem] hidden sm:block group">
+              <Search className="w-5 h-5 absolute left-5 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+              <input type="text" value={exploreSearch} onChange={handleGlobalSearch} placeholder="Search anything across the platform..." className="w-full pl-14 pr-4 py-4 bg-white border-2 border-transparent focus:border-blue-200 rounded-2xl outline-none text-sm font-bold text-slate-700 shadow-sm transition-all focus:shadow-md" />
+            </div>
+            
+            <div className="flex items-center space-x-6 ml-auto">
+              <div className="hidden lg:flex items-center px-5 py-3 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-100 rounded-2xl shadow-sm cursor-help hover:scale-105 transition-transform">
+                <Flame className="w-5 h-5 text-orange-500 mr-2 animate-pulse" />
+                <span className="text-sm font-black text-orange-700">5 Day Streak!</span>
+              </div>
+
+              <div className="relative">
+                <button onClick={() => setShowNotifs(!showNotifs)} className={`relative p-4 transition-colors bg-white rounded-2xl shadow-sm border ${showNotifs ? 'text-blue-600 border-blue-200' : 'text-slate-400 border-slate-100 hover:border-blue-100'}`}>
+                  <BellRing className="w-6 h-6" />
+                  {unreadRepliesCount > 0 && <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-rose-500 rounded-full border-2 border-white animate-ping"></span>}
+                  {unreadRepliesCount > 0 && <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-rose-500 rounded-full border-2 border-white"></span>}
+                </button>
+                
+                {showNotifs && (
+                  <div className="absolute top-16 right-0 w-80 bg-white rounded-[2rem] shadow-2xl border border-slate-100 p-5 z-50 animate-in slide-in-from-top-4">
+                     <div className="flex items-center justify-between mb-4 px-2">
+                       <h4 className="font-black text-slate-900 text-lg">Alerts</h4>
+                       <button onClick={() => setShowNotifs(false)} className="text-xs text-blue-600 font-bold hover:underline">Close</button>
+                     </div>
+                     {unreadRepliesCount > 0 ? (
+                       <div onClick={() => {setActiveTab('inbox'); setShowNotifs(false);}} className="p-4 bg-blue-50 rounded-2xl border border-blue-100 mb-3 cursor-pointer hover:bg-blue-100 transition-colors">
+                          <p className="text-sm font-black text-blue-900 flex items-center"><MessageSquare className="w-4 h-4 mr-2"/> {unreadRepliesCount} New Mentor Replies!</p>
+                          <p className="text-xs font-bold text-blue-600 mt-2 leading-relaxed">Click here to read your messages in the Inbox.</p>
+                       </div>
+                     ) : (
+                       <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors">
+                          <p className="text-sm font-black text-slate-800 flex items-center"><Sparkles className="w-4 h-4 mr-2 text-amber-500"/> Welcome to Kuppi Space!</p>
+                          <p className="text-xs font-bold text-slate-500 mt-2 leading-relaxed">You're all caught up on your notifications.</p>
+                       </div>
+                     )}
+                  </div>
+                )}
+              </div>
+
+              <div className="relative">
+                <div onClick={() => setShowProfile(!showProfile)} className={`flex items-center p-2 pr-6 bg-white rounded-[1.5rem] shadow-sm border cursor-pointer hover:shadow-md transition-all ${showProfile ? 'border-blue-300' : 'border-slate-100 hover:border-blue-100'}`}>
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-600 to-violet-500 flex items-center justify-center text-white font-black text-xl mr-4 shadow-inner overflow-hidden">
+                    {user?.avatar ? <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" /> : (user?.name ? user.name.charAt(0).toUpperCase() : 'U')}
+                  </div>
+                  <div className="hidden md:block text-left">
+                    <p className="text-sm font-black text-slate-900 leading-tight">{user?.name ? user.name.split(' ')[0] : 'Student'}</p>
+                    <p className="text-[10px] text-blue-600 font-bold uppercase tracking-widest mt-0.5">Learner</p>
+                  </div>
+                </div>
+
+                {showProfile && (
+                  <div className="absolute top-20 right-0 w-64 bg-white rounded-[2rem] shadow-2xl border border-slate-100 p-3 z-50 animate-in slide-in-from-top-4">
+                     <div className="flex items-center p-4 mb-2 bg-slate-50 rounded-2xl">
+                        <div className="w-14 h-14 bg-blue-100 rounded-xl text-blue-600 flex items-center justify-center font-black text-2xl mr-4 overflow-hidden border border-blue-200">
+                          {user?.avatar ? <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" /> : (user?.name ? user.name.charAt(0).toUpperCase() : 'U')}
+                        </div>
+                        <div>
+                          <p className="font-black text-slate-900 leading-tight text-lg truncate w-28">{user?.name ? user.name.split(' ')[0] : 'Student'}</p>
+                          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Free Tier</p>
+                        </div>
+                     </div>
+                     <div className="px-2 pb-2">
+                       <button onClick={() => {setActiveTab('settings'); setShowProfile(false);}} className="w-full text-left px-4 py-3 rounded-xl text-slate-700 font-bold hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center text-sm">
+                          <User className="w-4 h-4 mr-3" /> My Profile
+                       </button>
+                     </div>
+                     <hr className="border-slate-100 mb-2" />
+                     <button onClick={handleLogout} className="w-full text-left px-5 py-4 rounded-xl text-rose-600 font-black hover:bg-rose-50 transition-colors flex items-center text-sm">
+                        <LogOut className="w-5 h-5 mr-3" /> Secure Log Out
+                     </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </header>
+
+          <div className="p-8 pt-6 max-w-7xl mx-auto w-full relative pb-20">
+            {activeTab === 'dashboard' && renderDashboard()}
+            {activeTab === 'schedule' && renderSchedule()}
+            {activeTab === 'mentors' && renderMentors()}
+            {activeTab === 'leaderboard' && renderLeaderboard()}
+            {activeTab === 'inbox' && renderInbox()}
+            {activeTab === 'settings' && renderSettings()}
+          </div>
+        </main>
+      </div>
+
+      {/* Final Global Footer */}
+      <div className="w-full relative z-[200]">
+        <Footer />
+      </div>
 
       {/* 🔴 EXPLORE SESSIONS MODAL */}
       {isExploreOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 bg-[#0f172a]/90 backdrop-blur-2xl transition-all">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 sm:p-8 bg-[#0f172a]/90 backdrop-blur-2xl transition-all">
           <div className="bg-[#020617]/90 border border-blue-500/30 rounded-[3rem] w-full max-w-6xl h-[85vh] flex flex-col shadow-[0_0_100px_rgba(37,99,235,0.3)] overflow-hidden relative animate-in zoom-in-95 duration-300">
             <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-600/30 rounded-full mix-blend-screen filter blur-[120px] -z-10 animate-pulse"></div>
             <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-violet-600/20 rounded-full mix-blend-screen filter blur-[120px] -z-10 animate-pulse"></div>
@@ -1536,4 +1592,4 @@ const JuniorDashboard = () => {
   );
 };
 
-export default JuniorDashboard;
+export default JuniorDashboard; 

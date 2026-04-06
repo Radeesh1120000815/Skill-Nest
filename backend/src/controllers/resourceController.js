@@ -205,11 +205,19 @@ export const createResource = async (req, res) => {
     } = req.body;
 
     // Validation — required fields
-    if (!title || !moduleCode || !moduleName || !academicYear || !semester || !type) {
+    /*if (!title || !moduleCode || !moduleName || !academicYear || !semester || !type) {
       return res.status(400).json({
         message: 'title, moduleCode, moduleName, academicYear, semester, and type are required',
       });
+    }*/
+
+      if (!title || !type ) {
+      return res.status(400).json({
+        message: 'title, and type are required',
+      });
     }
+
+
 
     // Validate storageType + content
     if (!storageType || !['FILE', 'LINK'].includes(storageType)) {
@@ -227,9 +235,9 @@ export const createResource = async (req, res) => {
 
     const resource = await Resource.create({
       title:        title.trim(),
-      moduleCode:   moduleCode.toUpperCase().trim(),
-      moduleName:   moduleName.trim(),
-      academicYear: academicYear.trim(),
+      moduleCode:   moduleCode?.toUpperCase().trim() || '',
+      moduleName:   moduleName?.trim() || '',
+      academicYear: academicYear?.trim() || '',
       semester,
       type,
       description:  description?.trim(),

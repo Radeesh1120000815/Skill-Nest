@@ -1,3 +1,17 @@
+/* Navigation and Footer Link Hover Effects */
+.nav-a, .footer-link, .foot-col a, .foot-col .footer-link, .nav-btn {
+  transition: color 0.18s, background 0.18s, box-shadow 0.18s;
+}
+.nav-a:hover, .footer-link:hover, .foot-col a:hover, .foot-col .footer-link:hover {
+  color: #f5a623 !important;
+  background: rgba(245, 166, 35, 0.12);
+  border-radius: 7px;
+}
+.nav-btn:hover {
+  background: #ffbe4d;
+  color: #0f172a;
+  box-shadow: 0 4px 16px 0 #f5a62344;
+}
 .counter {
   font-size: 16px;
   padding: 5px 10px;

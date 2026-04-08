@@ -7,14 +7,14 @@ const sessionSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
-    // ─── Denormalised for fast reads ─────────────────────────────────────────
+    // Denormalised for fast reads 
     lecturerName: {
       type: String,
       default: '',
       trim: true,
     },
 
-    // ─── Core fields (kept from teammate) ────────────────────────────────────
+    // Core fields (kept from teammate) 
     title: {
       type: String,
       required: true,
@@ -45,7 +45,7 @@ const sessionSchema = new mongoose.Schema(
       min: 1,
     },
 
-    // ─── Added for student booking flow ──────────────────────────────────────
+    //  Added for student booking flow 
     sessionLink: {
       type: String,
       default: '',
@@ -67,7 +67,7 @@ const sessionSchema = new mongoose.Schema(
       default: 'active',
     },
 
-    // ─── Rating (recalculated from booking feedback) ──────────────────────────
+    //Rating (recalculated from booking feedback) 
     averageRating: {
       type: Number,
       default: 0,

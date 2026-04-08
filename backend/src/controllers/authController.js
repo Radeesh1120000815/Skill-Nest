@@ -24,7 +24,7 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    //  normalise role to uppercase for resource module
+    //  normalise role to uppercase to avoid confusion related to multiple roles existing in the system
     const roleMap = {
       'Student': 'STUDENT', 'student': 'STUDENT',
       'Lecturer': 'LECTURER', 'lecturer': 'LECTURER',
@@ -249,6 +249,43 @@ export const updatePassword = async (req, res) => {
 
     res.status(200).json({ message: 'Password updated successfully! 🔒✨' });
 
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+// @desc    Update user Kuppi role (junior/senior)
+// @route   PUT /api/auth/update-kuppi-role
+// @access  Public
+export const updateKuppiRole = async (req, res) => {
+  const { email, role } = req.body;
+  const allowedKuppiRoles = ['junior', 'senior', 'both'];
+
+  if (!allowedKuppiRoles.includes(role)) {
+    return res.status(400).json({ message: 'Invalid Kuppi role' });
+  }
+
+  try {
+    // ADD THIS: Never overwrite LECTURER or ADMIN roles
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) return res.status(404).json({ message: 'User not found' });
+    
+    if (['LECTURER', 'ADMIN'].includes(existingUser.role)) {
+      return res.status(403).json({ message: 'Cannot change role for this account type.' });
+    }
+
+    const user = await User.findOneAndUpdate(
+      { email },
+      { role },
+      { returnDocument: 'after' }
+    );
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

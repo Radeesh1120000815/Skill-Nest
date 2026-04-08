@@ -7,7 +7,8 @@ const API_BASE = 'http://localhost:5000/api';
 
 // Helper: inject auth header when token exists in localStorage
 const authHeader = () => {
-  const token = localStorage.getItem('token');
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+  const token = userInfo?.token;
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 

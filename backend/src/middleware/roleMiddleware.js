@@ -45,6 +45,6 @@ export const adminOnly = authorizeRoles('ADMIN');
 export const lecturerOrAdmin = authorizeRoles('LECTURER', 'ADMIN');
 
 /**
- * authenticatedUser — any logged-in role (STUDENT | LECTURER | ADMIN)
+ * authenticatedUser — any logged-in role (STUDENT | LECTURER | ADMIN | junior|senior|both)
  */
-export const authenticatedUser = authorizeRoles('STUDENT', 'LECTURER', 'ADMIN');
+export const authenticatedUser = authorizeRoles('STUDENT', 'LECTURER', 'ADMIN','junior','senior','both');

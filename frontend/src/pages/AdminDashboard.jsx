@@ -51,7 +51,7 @@ const SIDEBAR_SECTIONS = [
 export default function AdminDashboard() {
   const location = useLocation();
   const navigate = useNavigate();
-  const user     = JSON.parse(localStorage.getItem('user') || 'null');
+  const user     = JSON.parse(localStorage.getItem('userInfo') || 'null');
 
   const [sidebarOpen,     setSidebarOpen]     = useState(true);
   const [expandedSection, setExpandedSection] = useState('Resources');
@@ -67,7 +67,7 @@ export default function AdminDashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem('userInfo');
     navigate('/signin');
   };
 

@@ -62,13 +62,13 @@ export default function AdminResourceQueue() {
  
   const location    = useLocation();
   const navigate    = useNavigate();
-  const user        = JSON.parse(localStorage.getItem('user') || 'null');
+  const user        = JSON.parse(localStorage.getItem('userInfo') || 'null');
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/login');
+    localStorage.removeItem('userInfo');
+    navigate('/signin');
   };
 
   return (

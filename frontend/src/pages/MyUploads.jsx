@@ -63,13 +63,13 @@ export default function MyUploads() {
   //UI-only state
   const location  = useLocation();
   const navigate  = useNavigate();
-  const user      = JSON.parse(localStorage.getItem('user') || 'null');
+  const user      = JSON.parse(localStorage.getItem('userInfo') || 'null');
   const isAdmin   = user?.role === 'ADMIN';
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem('userInfo');
     navigate('/signin');
   };
 
@@ -150,6 +150,19 @@ export default function MyUploads() {
 
             {/* Logout + Live dot */}
             <div style={{ marginTop:'auto', display:'flex', flexDirection:'column', gap:'6px' }}>
+              {sidebarOpen && user && (<div style={{margin:'0 8px', padding:'10px 14px',borderRadius:'12px', background: T.primaryLight,
+                              border:`1px solid ${T.border}`,display:'flex', alignItems:'center', gap:'10px',}}>
+                                <div style={{width:'30px', height:'30px', borderRadius:'8px',background: T.primary, display:'flex',alignItems:'center', justifyContent:'center',color:'white', fontSize:'13px', fontWeight:700,flexShrink:0,}}>
+                                  {user.name?.charAt(0).toUpperCase()} </div>
+                                  <div style={{ overflow:'hidden' }}>
+                                    <p style={{ fontSize:'12px', fontWeight:700, color: T.textPrimary, fontFamily:'Inter,sans-serif', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', margin:0 }}>
+                                      {user.name?.split(' ')[0]}
+                                      </p>
+                                      <p style={{ fontSize:'10px', color: T.textMuted, fontFamily:'Inter,sans-serif', textTransform:'uppercase', letterSpacing:'0.05em', margin:0 }}>
+                                        {user.role}
+                                        </p>
+                                        </div>
+                                        </div>)}
               <button onClick={handleLogout} className="sn-side-link"
                 style={{ position:'relative', display:'flex', alignItems:'center', gap:'12px', padding:sidebarOpen?'12px 16px':'13px 0', justifyContent:sidebarOpen?'flex-start':'center', margin:'2px 8px', borderRadius:'12px', background:'transparent', border:'none', color:T.red, cursor:'pointer', transition:'all .18s ease', width:'calc(100% - 16px)' }}
                 onMouseEnter={e => e.currentTarget.style.background=T.redLight}

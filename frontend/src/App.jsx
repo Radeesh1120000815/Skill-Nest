@@ -15,6 +15,12 @@ import HelpCenter from './pages/HelpCenter';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import AdminDashboard from './pages/AdminDashboard.jsx';
+import AdminManageUsers from './pages/AdminManageUsers';
+import AdminSessionsOverview from './pages/AdminSessionsOverview';
+import LecturerDashboard from './pages/LecturerDashboard';
+import LecturerCreateSession from './pages/LecturerCreateSession';
+import LecturerSessions from './pages/LecturerSessions';
+import LecturerCompletedSessions from './pages/LecturerCompletedSessions';
 import ScrollToTop from './components/ScrollToTop';
 import ResourceHub        from './pages/ResourceHub.jsx';
 import ResourceDetail     from './pages/ResourceDetail.jsx';
@@ -23,12 +29,12 @@ import MyUploads          from './pages/MyUploads.jsx';
 import MyBookmarks        from './pages/MyBookmarks.jsx';
 import AdminResourceQueue from './pages/AdminResourceQueue.jsx';
 import UploadNewVersion from './pages/UploadNewVersion.jsx';
+import { ResourceProvider } from './components/context/ResourceContext.jsx' // Resource context provider
+import StudentDashboard from './pages/StudentDashboard.jsx';
+import WatchSession from './pages/WatchSession.jsx';
+import FeedbackPage from './pages/FeedbackPage.jsx';
+import './index.css'; // CSS imports
 
-// Resource context provider
-import { ResourceProvider } from './components/context/ResourceContext.jsx'
-
-// CSS imports
-import './index.css'; 
 
 /**  Simple route guard — redirects to /login if no token
 const PrivateRoute = ({ children, allowedRoles }) => {
@@ -72,15 +78,30 @@ function App() {
           <Route path="/senior-dashboard" element={<SeniorDashboard />} />
 
 
+          {/*Lecturer dashboard + Lecture sessions */}
+          <Route path="/lecturer-dashboard" element={<LecturerDashboard />} />
+          <Route path="/lecturer-create-session" element={<LecturerCreateSession />} />
+          <Route path="/lecturer-sessions" element={<LecturerSessions />} />
+          <Route path="/lecturer-completed-sessions" element={<LecturerCompletedSessions />} />
+
+
+          {/* Student Dashboard +  Lecture Session */}
+
+          <Route path="/student-dashboard" element={<StudentDashboard />} />
+          <Route path="/watch-session/:id" element={<WatchSession />} />
+          <Route path="/feedback/:id" element={<FeedbackPage />} />
+
 
           {/* Oya dila nathi path ekak gahuvoth Login ekata redirect karanawa (404 safety) */}
-          <Route path="*" element={<Navigate to="/login" />} />
+          <Route path="*" element={<Navigate to="/signin" />} />
 
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/main-forgot" element={<MainForgot />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           <Route path="/admin" element={<ResourceProvider><AdminDashboard /></ResourceProvider>} />
+          <Route path="/admin/users" element={<ResourceProvider><AdminManageUsers /></ResourceProvider>} />
+          <Route path="/admin/sessions" element={<ResourceProvider><AdminSessionsOverview /></ResourceProvider>} />
 
           <Route path="/resources"    element={<ResourceProvider><ResourceHub /></ResourceProvider>} />
           <Route path="/resources/:id" element={<ResourceProvider><ResourceDetail /></ResourceProvider>} />
@@ -126,8 +147,9 @@ function App() {
             />
 
             
+
           {/* Fallback */}
-            <Route path="*" element={<Navigate to="/login" />} />
+            <Route path="*" element={<Navigate to="/signin" />} />
         </Routes>
       </div>
     </Router>

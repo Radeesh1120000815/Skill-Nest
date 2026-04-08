@@ -79,7 +79,7 @@ export default function AdminManageUsers() {
     }
 
     try {
-      const backendUrl = 'http://localhost:5001';
+      const backendUrl = 'http://localhost:5000';
       const token = parsed.token;
 
       const { data } = await axios.patch(
@@ -114,7 +114,7 @@ export default function AdminManageUsers() {
     }
 
     try {
-      const backendUrl = 'http://localhost:5001';
+      const backendUrl = 'http://localhost:5000';
       const token = parsed.token;
 
       await axios.delete(`${backendUrl}/api/admin/users/${userId}`, {
@@ -151,7 +151,7 @@ export default function AdminManageUsers() {
           <div className="flex items-center gap-3 self-start md:self-auto">
             <button
               type="button"
-              onClick={() => navigate('/admin-dashboard')}
+              onClick={() => navigate('/admin')}
               className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
             >
               

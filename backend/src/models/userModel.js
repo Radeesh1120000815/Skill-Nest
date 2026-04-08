@@ -7,9 +7,10 @@ const userSchema = mongoose.Schema(
     password: { type: String, required: true },
     role: { 
       type: String, 
-      enum: ['junior', 'senior', 'both'], 
-      default: 'junior' 
+      enum: ['junior', 'senior', 'both','STUDENT', 'LECTURER', 'ADMIN'], 
     },
+    universityId:{type: String},
+    
     batch_details: {
       year: Number,
       semester: Number,

@@ -10,9 +10,10 @@ import resourceRoutes      from './routes/resourceRoutes.js';
 import bookmarkRoutes      from './routes/bookmarkRoutes.js';
 import adminResourceRoutes from './routes/adminResourceRoutes.js';
 
-//Session and Lecture Routes
+//Session and Lecture,Admin Session Routes
 import sessionRoutes from './routes/sessionRoutes.js';
 import lecturerRoutes from './routes/lecturerRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 //Booking Routes
 import bookingRoutes from './routes/bookingRoutes.js';
@@ -41,6 +42,7 @@ app.use('/api/quizzes', quizRoutes);
 app.use('/api/resources',        resourceRoutes);      // Public + auth resource endpoints
 app.use('/api/bookmarks',        bookmarkRoutes);      // GET /api/bookmarks/my
 app.use('/api/admin/resources',  adminResourceRoutes); // Admin approval queue
+app.use('/api/admin', adminRoutes);
 app.use('/api/sessions', sessionRoutes); //session route registration
 app.use('/api/lecturers', lecturerRoutes);
 app.use('/api/bookings',bookingRoutes); //

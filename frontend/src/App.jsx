@@ -15,8 +15,8 @@ import HelpCenter from './pages/HelpCenter';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import AdminDashboard from './pages/AdminDashboard.jsx';
-import AdminManageUsers from './pages/AdminManageUsers';
-import AdminSessionsOverview from './pages/AdminSessionsOverview';
+//import AdminManageUsers from './pages/AdminManageUsers';
+//import AdminSessionsOverview from './pages/AdminSessionsOverview';
 import LecturerDashboard from './pages/LecturerDashboard';
 import LecturerCreateSession from './pages/LecturerCreateSession';
 import LecturerSessions from './pages/LecturerSessions';
@@ -100,8 +100,8 @@ function App() {
           <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           <Route path="/admin" element={<ResourceProvider><AdminDashboard /></ResourceProvider>} />
-          <Route path="/admin/users" element={<ResourceProvider><AdminManageUsers /></ResourceProvider>} />
-          <Route path="/admin/sessions" element={<ResourceProvider><AdminSessionsOverview /></ResourceProvider>} />
+          {/*<Route path="/admin/users" element={<ResourceProvider><AdminManageUsers /></ResourceProvider>} />
+          <Route path="/admin/sessions" element={<ResourceProvider><AdminSessionsOverview /></ResourceProvider>} /> */}
 
           <Route path="/resources"    element={<ResourceProvider><ResourceHub /></ResourceProvider>} />
           <Route path="/resources/:id" element={<ResourceProvider><ResourceDetail /></ResourceProvider>} />

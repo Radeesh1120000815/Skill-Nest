@@ -241,7 +241,7 @@ export const createResource = async (req, res) => {
       semester,
       type,
       description:  description?.trim(),
-      tags:         tags ? (Array.isArray(tags) ? tags : tags.split(',').map((t) => t.trim().toLowerCase())) : [],
+      tags: tags ? (Array.isArray(tags) ? tags : tags.split(',').map((t) => t.trim().replace(/^#+/, '').toLowerCase()).filter(Boolean)) : [],
       createdBy:    req.user._id,
       approvalStatus: isAutoApproved ? 'APPROVED' : 'PENDING',
       ...(isAutoApproved && {

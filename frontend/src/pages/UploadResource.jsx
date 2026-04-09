@@ -266,7 +266,7 @@ export default function UploadResource() {
                       </div>
                       <div style={{ gridColumn:'1/-1' }}>
                         <label className="ur-label">Tags (comma-separated)</label>
-                        <input name="tags" value={form.tags} onChange={handleChange} placeholder="e.g. algorithms, sorting, trees" className="ur-input"/>
+                        <input name="tags" value={form.tags} onChange={handleChange} placeholder="e.g. #algorithms, #sorting, trees" className="ur-input"/>
                       </div>
                     </div>
                   </div>

@@ -362,7 +362,7 @@ const SeniorDashboard = () => {
   };
 
   const openEditModal = (group) => {
-    setEditModal({
+    setEditModal({ 
       isOpen: true, groupId: group._id,
       formData: { module_name: group.module_name, max_members: group.max_members, session_link: group.session_link, semester: group.semester, quiz_link: group.quiz_link || '' }
     });
@@ -561,7 +561,7 @@ const SeniorDashboard = () => {
 
   const myHostedGroups = myGroups.filter(g => g.senior_id?._id === user?._id || g.senior_id === user?._id || !g.senior_id);
   const filteredSessions = myHostedGroups.filter(g => g.module_name.toLowerCase().includes(sessionSearch.toLowerCase()));
-  
+   
   const totalStudents = myHostedGroups.reduce((sum, group) => sum + (group.current_members?.length || 0), 0);
   const allPendingRequests = myHostedGroups.flatMap(group => 
     (group.pending_members || []).map(student => ({ student, group }))
@@ -1145,11 +1145,7 @@ const SeniorDashboard = () => {
                               Cancel
                             </button>
                             <button onClick={() => {
-                                if(thread.length === 0 && !msg.reply) {
-                                  handleReplySubmit(msg.id); // Use old method for first reply compatibility
-                                } else {
-                                  handleThreadReply(msg.id); // Append to thread array
-                                }
+                                handleThreadReply(msg.id); // ← use this for all cases
                               }} 
                               disabled={!replyText.trim() || replyText.length > 500} className="flex-1 sm:flex-none px-8 py-3.5 text-xs font-black text-white bg-gradient-to-r from-fuchsia-600 to-indigo-600 hover:from-fuchsia-500 hover:to-indigo-500 rounded-2xl shadow-xl shadow-fuchsia-500/30 transition-all flex items-center justify-center hover:-translate-y-1 group/send disabled:opacity-50 disabled:hover:translate-y-0">
                               Send Reply <Send className="w-4 h-4 ml-2 group-hover/send:translate-x-1 group-hover/send:-translate-y-1 transition-transform" />

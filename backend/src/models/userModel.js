@@ -9,7 +9,7 @@ const userSchema = mongoose.Schema(
       type: String, 
       enum: ['junior', 'senior', 'both','STUDENT', 'LECTURER', 'ADMIN'], 
     },
-    universityId: { type: String },
+    universityId:{type: String},
     
     batch_details: {
       year: Number,

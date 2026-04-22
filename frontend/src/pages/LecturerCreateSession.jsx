@@ -23,9 +23,12 @@ export default function LecturerCreateSession() {
     document.title = 'Create Session - Skill Nest';
     // If user is not logged in at all, redirect to sign-in
     const stored = localStorage.getItem('userInfo');
-    if (!stored) {
+    /*if (!stored) {
       navigate('/signin');
-    }
+    }*/
+   if (!stored) { navigate('/signin'); return; }
+   const parsed = JSON.parse(stored);
+   if (parsed?.role !== 'LECTURER') { navigate('/signin', { replace: true }); return; }
   }, [navigate]);
 
   const handleSubmit = async (e) => {
@@ -102,18 +105,19 @@ export default function LecturerCreateSession() {
           duration,
         },
         {
-          headers: {
+          /*headers: {
             'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
             ...(userId ? { 'x-user-id': userId } : {}),
-          },
+          },*/
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       setSuccess('Session created successfully.');
-      // Optionally navigate back to dashboard after short delay
+      // After create, go to sessions page to show created session details.
       setTimeout(() => {
-        navigate('/lecturer-dashboard');
+        navigate('/lecturer-sessions');
       }, 800);
     } catch (err) {
       const message = err?.response?.data?.message || 'Failed to create session. Please try again.';
@@ -131,8 +135,15 @@ export default function LecturerCreateSession() {
     <div className="min-h-screen flex flex-col bg-[#f5f7f2]">
       <Navbar />
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
-        <header className="mb-6">
+        <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-3xl font-extrabold text-slate-900">Create New Session</h1>
+          <button
+            type="button"
+            onClick={() => navigate('/lecturer-dashboard')}
+            className="inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50"
+          >
+            Back to Dashboard
+          </button>
         </header>
 
         {error && (

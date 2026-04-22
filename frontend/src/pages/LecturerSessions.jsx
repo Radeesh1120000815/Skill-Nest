@@ -27,22 +27,28 @@ export default function LecturerSessions() {
       try {
         setError('');
         const stored = localStorage.getItem('userInfo');
-        const parsed = stored ? JSON.parse(stored) : null;
-        const token = parsed?.token;
-        const userId = parsed?._id;
+        // ── Guard: must be defined BEFORE using parsed ──
+        if (!stored) { navigate('/signin'); return; }
+        const parsed = JSON.parse(stored);
+        if (parsed?.role !== 'LECTURER') { navigate('/signin', { replace: true }); return; }
+        const token  = parsed?.token;   // safe, parsed exists
+        
 
         // If there is no saved user at all, redirect to sign-in
-        if (!stored) {
+        /*if (!stored) {
           navigate('/signin');
           return;
-        }
+        }*/
+
+        
         const backendUrl = 'http://localhost:5001';
 
         const { data } = await axios.get(`${backendUrl}/api/sessions/my`, {
-          headers: {
+          /*headers: {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
             ...(userId ? { 'x-user-id': userId } : {}),
-          },
+          },*/
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         setSessions(data || []);
@@ -72,10 +78,11 @@ export default function LecturerSessions() {
       const backendUrl = 'http://localhost:5001';
 
       await axios.delete(`${backendUrl}/api/sessions/${id}`, {
-        headers: {
+        /*headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
           ...(userId ? { 'x-user-id': userId } : {}),
-        },
+        },*/
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       setSessions((prev) => prev.filter((s) => s._id !== id));
@@ -157,11 +164,12 @@ export default function LecturerSessions() {
           duration: editForm.duration,
         },
         {
-          headers: {
+         /* headers: {
             'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
             ...(userId ? { 'x-user-id': userId } : {}),
-          },
+          },*/
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -186,13 +194,22 @@ export default function LecturerSessions() {
     <div className="min-h-screen flex flex-col bg-[#f5f7f2]">
       <Navbar />
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
-        <header className="mb-6">
-          <h1 className="text-3xl font-extrabold text-slate-900">My Sessions</h1>
-          <p className="text-slate-600 mt-2 max-w-2xl text-sm">
-            This page shows all the sessions i have created as a lecturer.
-            I can quickly review the key details, update information when plans change,
-            and remove sessions that are no longer needed.
-          </p>
+        <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-extrabold text-slate-900">My Sessions</h1>
+            <p className="text-slate-600 mt-2 max-w-2xl text-sm">
+              This page shows all the sessions i have created as a lecturer.
+              I can quickly review the key details, update information when plans change,
+              and remove sessions that are no longer needed.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/lecturer-dashboard')}
+            className="inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50"
+          >
+            Back to Dashboard
+          </button>
         </header>
 
         {error && (

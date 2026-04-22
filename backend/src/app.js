@@ -10,6 +10,17 @@ import studentRoutes from './routes/studentRoutes.js';
 import sessionRoutes from './routes/sessionRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 
+//Resource Mnagement Routes
+import resourceRoutes      from './routes/resourceRoutes.js';
+import bookmarkRoutes      from './routes/bookmarkRoutes.js';
+import adminResourceRoutes from './routes/adminResourceRoutes.js';
+
+//Booking Routes
+import bookingRoutes from './routes/bookingRoutes.js';
+
+
+
+
 const app = express();
 
 // Global request logger middleware
@@ -27,16 +38,22 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Required for multipart form fields
+
+
 
 // API Endpoints
 app.use('/api/auth', authRoutes); 
 app.use('/api/groups', groupRoutes); 
 app.use('/api/quizzes', quizRoutes);
-
-app.use('/api/lecturers', lecturerRoutes);
-app.use('/api/students', studentRoutes);
-app.use('/api/sessions', sessionRoutes);
+app.use('/api/resources',        resourceRoutes);      // Public + auth resource endpoints
+app.use('/api/bookmarks',        bookmarkRoutes);      // GET /api/bookmarks/my
+app.use('/api/admin/resources',  adminResourceRoutes); // Admin approval queue
 app.use('/api/admin', adminRoutes);
+app.use('/api/sessions', sessionRoutes); //session route registration
+app.use('/api/lecturers', lecturerRoutes);
+app.use('/api/bookings',bookingRoutes); //
+app.use('/api/students', studentRoutes);
 
 // Test Route
 app.get('/', (req, res) => {

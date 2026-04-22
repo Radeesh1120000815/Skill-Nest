@@ -1,21 +1,31 @@
 import express from 'express';
-import { createSession, getMySessions, getMyAllSessions, updateSession, deleteSession } from '../controllers/sessionController.js';
+import {
+  createSession,
+  getMySessions,
+  getMyAllSessions,
+  updateSession,
+  deleteSession,
+  getAllSessions,
+  getSessionById,
+} from '../controllers/sessionController.js';
+import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Lecturer creates a new session (uses x-user-id header from frontend)
-router.post('/', createSession);
+// ── All routes require a valid JWT (protect middleware) ───────────────────────
+router.use(protect);
 
-// Get sessions for logged-in lecturer (uses x-user-id header from frontend)
-router.get('/my', getMySessions);
+// ── Student route ─────────────────────────────────────────────────────────────
+router.get('/', getAllSessions);           // GET all active sessions
 
-// Get all sessions (upcoming + completed) for logged-in lecturer
-router.get('/my/all', getMyAllSessions);
+// ── Lecturer routes ───────────────────────────────────────────────────────────
+router.post('/', createSession);           // POST create session
+router.get('/my', getMySessions);          // GET upcoming sessions (lecturer's own)
+router.get('/my/all', getMyAllSessions);   // GET all sessions (lecturer's own)
+router.put('/:id', updateSession);         // PUT update session
+router.delete('/:id', deleteSession);      // DELETE session
 
-// Update a specific session
-router.put('/:id', updateSession);
-
-// Delete a specific session
-router.delete('/:id', deleteSession);
+// ── Shared ────────────────────────────────────────────────────────────────────
+router.get('/:id', getSessionById);        // GET single session by ID
 
 export default router;

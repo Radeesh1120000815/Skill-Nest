@@ -11,8 +11,8 @@ export const getAllUsers = async (req, res) => {
 
     const { role } = req.query;
     const filter = {};
-    if (role) {
-      filter.role = role.toLowerCase();
+    if (role && role !== 'all') {
+        filter.role = role;
     }
 
     const users = await User.find(filter)
@@ -106,7 +106,7 @@ export const getAdminSessions = async (req, res) => {
 
 // @desc    Get high-level admin stats
 // @route   GET /api/admin/stats
-// @access  Admin
+ // @access  Admin
 export const getAdminStats = async (req, res) => {
   try {
     await ensureDbConnection();
@@ -123,9 +123,9 @@ export const getAdminStats = async (req, res) => {
       activeUpcomingSessions,
     ] = await Promise.all([
       User.countDocuments({}),
-      User.countDocuments({ role: 'student' }),
-      User.countDocuments({ role: 'lecturer' }),
-      User.countDocuments({ role: 'admin' }),
+      User.countDocuments({ role: 'STUDENT' }),
+      User.countDocuments({ role: 'LECTURER' }),
+      User.countDocuments({ role: 'ADMIN' }),
       User.countDocuments({ status: 'active' }),
       User.countDocuments({ status: 'blocked' }),
       Session.countDocuments({ date: { $gte: now } }),

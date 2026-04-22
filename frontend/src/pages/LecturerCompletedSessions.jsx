@@ -12,24 +12,29 @@ export default function LecturerCompletedSessions() {
   useEffect(() => {
     document.title = 'Completed Sessions — Skill Nest';
 
-    const stored = localStorage.getItem('userInfo');
+    /*const stored = localStorage.getItem('userInfo');
     if (!stored) {
       navigate('/signin');
       return;
-    }
+    }*/
+
+    const stored = localStorage.getItem('userInfo');
+    if (!stored) { navigate('/signin'); return; }
+    const parsed = JSON.parse(stored);
+    if (parsed.role !== 'LECTURER') { navigate('/signin', { replace: true }); return; }
 
     try {
-      const parsed = JSON.parse(stored);
       const backendUrl = 'http://localhost:5001';
       const token = parsed?.token;
       const userId = parsed?._id;
 
       axios
         .get(`${backendUrl}/api/sessions/my/all`, {
-          headers: {
+          /*headers: {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
             ...(userId ? { 'x-user-id': userId } : {}),
-          },
+          },*/
+          headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
           const all = res.data || [];

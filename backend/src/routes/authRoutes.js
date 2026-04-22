@@ -5,7 +5,8 @@ import {
   getUserProfile,
   forgotPassword, 
   resetPassword,
-  updatePassword // 🔴 Aluthen ekathu kala: Dashboard eken password maru karanna
+  updatePassword ,// 🔴 Aluthen ekathu kala: Dashboard eken password maru karanna
+  updateKuppiRole
 } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import User from '../models/userModel.js'; 
@@ -37,6 +38,9 @@ router.get('/profile', protect, getUserProfile);
 
 // 🔒 Private route - Change Password from Dashboard (Aluthen ekathu kala)
 router.put('/update-password', protect, updatePassword);
+
+// 🔓 Public route - Update Kuppi role
+router.put('/update-kuppi-role', updateKuppiRole);
 
 // 🟢 GET: Senior Mentors (Dashboard list eka hadanna)
 router.get('/mentors', protect, async (req, res) => {

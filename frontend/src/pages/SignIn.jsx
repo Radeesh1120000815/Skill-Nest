@@ -5,6 +5,38 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import axios from 'axios';
 
+const REMEMBERED_EMAILS_KEY = 'rememberedEmailsByRole';
+
+const getRememberedEmailsByRole = () => {
+	try {
+		const raw = localStorage.getItem(REMEMBERED_EMAILS_KEY);
+		const parsed = raw ? JSON.parse(raw) : {};
+		return {
+			student: Array.isArray(parsed.student) ? parsed.student : [],
+			lecturer: Array.isArray(parsed.lecturer) ? parsed.lecturer : [],
+			admin: Array.isArray(parsed.admin) ? parsed.admin : [],
+		};
+	} catch {
+		return { student: [], lecturer: [], admin: [] };
+	}
+};
+
+const saveRememberedEmail = (accountType, value) => {
+	const emailValue = String(value || '').trim().toLowerCase();
+	if (!emailValue) return getRememberedEmailsByRole();
+
+	const current = getRememberedEmailsByRole();
+	const currentList = current[accountType] || [];
+	const updatedList = [emailValue, ...currentList.filter((item) => item !== emailValue)].slice(0, 8);
+	const updated = {
+		...current,
+		[accountType]: updatedList,
+	};
+
+	localStorage.setItem(REMEMBERED_EMAILS_KEY, JSON.stringify(updated));
+	return updated;
+};
+
 const Favicon = () => (
 	<svg width="24" height="24" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight:8,verticalAlign:'middle'}}>
 		<circle cx="22" cy="22" r="20.5" fill="#1a3d28" stroke="#2e7d52" strokeWidth="1.3"/>
@@ -28,9 +60,22 @@ export default function SignIn() {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
+	const [rememberMe, setRememberMe] = useState(true);
+	const [savedEmailsByRole, setSavedEmailsByRole] = useState({ student: [], lecturer: [], admin: [] });
+	const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
 	const [errors, setErrors] = useState({});
 	const [loading, setLoading] = useState(false);
 	const navigate = useNavigate();
+
+	useEffect(() => {
+		setSavedEmailsByRole(getRememberedEmailsByRole());
+	}, []);
+
+	useEffect(() => {
+		setShowEmailSuggestions(false);
+	}, [accountType]);
+
+	const currentRoleEmails = savedEmailsByRole[accountType] || [];
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -50,12 +95,16 @@ export default function SignIn() {
 			const API_URL = 'http://localhost:5001/api/auth/login';
 			const response = await axios.post(API_URL, { email, password });
 
-			const userRole = response.data.role?.toLowerCase();
-			const resolvedAccountType = userRole === 'admin'
-				? 'admin'
-				: userRole === 'lecturer'
-					? 'lecturer'
-					: 'student';
+			const rawRole = response.data.role;
+			const userRole = rawRole?.toUpperCase();
+			const resolvedAccountType = userRole === 'ADMIN' ? 'admin'
+				: userRole === 'LECTURER' ? 'lecturer'
+				: ['STUDENT','JUNIOR','SENIOR','BOTH'].includes(userRole) ? 'student'
+				: 'student';
+
+		
+
+
 
 			// Enforce that selected account type matches authenticated role.
 			if (resolvedAccountType !== accountType) {
@@ -66,10 +115,15 @@ export default function SignIn() {
 			}
 
 			// Save user info only when selected role and actual role are aligned.
+			if (rememberMe) {
+				const updatedSaved = saveRememberedEmail(accountType, email);
+				setSavedEmailsByRole(updatedSaved);
+			}
+
 			localStorage.setItem('userInfo', JSON.stringify(response.data));
 
 			if (resolvedAccountType === 'admin') {
-				navigate('/admin-dashboard');
+				navigate('/admin');
 			} else if (resolvedAccountType === 'lecturer') {
 				navigate('/lecturer-dashboard');
 			} else {
@@ -159,21 +213,45 @@ export default function SignIn() {
 						{/* Email Field */}
 						<div style={{ marginBottom: errors.email ? 4 : 16 }}>
 							<label style={{ display: 'block', fontWeight: 600, color: '#222', marginBottom: 6, fontSize: 15 }}>Email address</label>
-							<input
-								type="email"
-								placeholder={
-									accountType === 'lecturer' ? 'lecturer@gmail.com' :
-									accountType === 'admin' ? 'admin@gmail.com' :
-									'you@gmail.com'
-								}
-								value={email}
-								onChange={e => {
-									setEmail(e.target.value);
-									if (errors.email) setErrors({ ...errors, email: '' });
-								}}
-								className={errors.email ? 'signin-input-error' : ''}
-								style={{ width: '100%', padding: '14px 14px', borderRadius: 12, border: errors.email ? '1.5px solid #dc2626' : '1.5px solid #e5e7eb', fontSize: 16, color: '#222', background: '#f8fafc', outline: 'none', fontWeight: 500 }}
-							/>
+							<div style={{ position: 'relative' }}>
+								<input
+									type="email"
+									placeholder={
+										accountType === 'lecturer' ? 'lecturer@gmail.com' :
+										accountType === 'admin' ? 'admin@gmail.com' :
+										'you@gmail.com'
+									}
+									value={email}
+									onFocus={() => setShowEmailSuggestions(true)}
+									onBlur={() => {
+										setTimeout(() => setShowEmailSuggestions(false), 120);
+									}}
+									onChange={e => {
+										setEmail(e.target.value);
+										if (errors.email) setErrors({ ...errors, email: '' });
+									}}
+									className={errors.email ? 'signin-input-error' : ''}
+									style={{ width: '100%', padding: '14px 14px', borderRadius: 12, border: errors.email ? '1.5px solid #dc2626' : '1.5px solid #e5e7eb', fontSize: 16, color: '#222', background: '#f8fafc', outline: 'none', fontWeight: 500 }}
+								/>
+								{showEmailSuggestions && currentRoleEmails.length > 0 && (
+									<div style={{ position: 'absolute', left: 0, right: 0, top: 'calc(100% + 6px)', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, boxShadow: '0 8px 20px #1e293b12', zIndex: 20, maxHeight: 190, overflowY: 'auto' }}>
+										{currentRoleEmails.map((savedEmail) => (
+											<button
+												key={savedEmail}
+												type="button"
+												onMouseDown={() => {
+													setEmail(savedEmail);
+													setShowEmailSuggestions(false);
+													if (errors.email) setErrors({ ...errors, email: '' });
+												}}
+												style={{ width: '100%', textAlign: 'left', border: 'none', background: 'transparent', padding: '10px 12px', fontSize: 14, color: '#1f2937', cursor: 'pointer' }}
+											>
+												{savedEmail}
+											</button>
+										))}
+									</div>
+								)}
+							</div>
 							{errors.email && <div className="signin-error-msg">{errors.email}</div>}
 						</div>
 						{/* Password Field */}
@@ -204,7 +282,7 @@ export default function SignIn() {
 						{/* Remember me and Forgot password */}
 						<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
 							<label style={{ display: 'flex', alignItems: 'center', fontSize: 15, color: '#222', fontWeight: 500 }}>
-								<input type="checkbox" style={{ marginRight: 8, accentColor: '#3b5bfe', width: 16, height: 16 }} />
+								<input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} style={{ marginRight: 8, accentColor: '#3b5bfe', width: 16, height: 16 }} />
 								Remember me
 							</label>
 							<Link to="/main-forgot" className="signin-link-underline">Forgot your password?</Link>

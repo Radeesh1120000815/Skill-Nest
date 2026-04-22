@@ -27,7 +27,7 @@ export const registerLecturer = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: 'lecturer',
+      role: 'LECTURER',
       lecturerId,
     });
 

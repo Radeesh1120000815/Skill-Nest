@@ -28,6 +28,15 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    //  normalise role to uppercase to avoid confusion related to multiple roles existing in the system
+    const roleMap = {
+      'Student': 'STUDENT', 'student': 'STUDENT',
+      'Lecturer': 'LECTURER', 'lecturer': 'LECTURER',
+      'Admin': 'ADMIN', 'admin': 'ADMIN',
+    };
+    const normalisedRole = roleMap[role] || role;
+    // END OF ADDITION
+
     // Password hashing (Salting)
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -36,7 +45,7 @@ export const registerUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role,
+      role:normalisedRole,
       batch_details
     });
 
@@ -69,15 +78,13 @@ export const loginUser = async (req, res) => {
 
     let passwordMatches = false;
 
-    // Normal case: password already hashed with bcrypt
+    // Normal case: hashed password
     if (user.password && user.password.startsWith('$2')) {
       passwordMatches = await bcrypt.compare(password, user.password);
     } else {
-      // Legacy case: password was stored as plain text (e.g., older lecturer accounts)
+      // Legacy plain-text fallback and automatic migration to hash
       if (user.password === password) {
         passwordMatches = true;
-
-        // Migrate to hashed password for better security
         try {
           const salt = await bcrypt.genSalt(10);
           user.password = await bcrypt.hash(password, salt);
@@ -88,17 +95,42 @@ export const loginUser = async (req, res) => {
       }
     }
 
-    if (passwordMatches) {
-      return res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        token: generateToken(user._id),
+    if (!passwordMatches) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Optional: if frontend sends selected role, validate role alignment
+    const roleMap = {
+      student: 'STUDENT',
+      lecturer: 'LECTURER',
+      admin: 'ADMIN',
+    };
+
+    const normalizeRole = (role) => {
+      if (!role) return '';
+      const raw = String(role).toLowerCase();
+      if (raw === 'student' || raw === 'junior' || raw === 'senior' || raw === 'both') return 'STUDENT';
+      if (raw === 'lecturer') return 'LECTURER';
+      if (raw === 'admin') return 'ADMIN';
+      return String(role).toUpperCase();
+    };
+
+    const expectedRole = roleMap[req.body.role];
+    const actualRole = normalizeRole(user.role);
+
+    if (expectedRole && actualRole !== expectedRole) {
+      return res.status(401).json({
+        message: `This account is registered as ${actualRole.toLowerCase()}. Please select the correct account type.`,
       });
     }
 
-    return res.status(401).json({ message: 'Invalid email or password' });
+    return res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -258,6 +290,43 @@ export const updatePassword = async (req, res) => {
 
     res.status(200).json({ message: 'Password updated successfully! 🔒✨' });
 
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+// @desc    Update user Kuppi role (junior/senior)
+// @route   PUT /api/auth/update-kuppi-role
+// @access  Public
+export const updateKuppiRole = async (req, res) => {
+  const { email, role } = req.body;
+  const allowedKuppiRoles = ['junior', 'senior', 'both'];
+
+  if (!allowedKuppiRoles.includes(role)) {
+    return res.status(400).json({ message: 'Invalid Kuppi role' });
+  }
+
+  try {
+    // ADD THIS: Never overwrite LECTURER or ADMIN roles
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) return res.status(404).json({ message: 'User not found' });
+    
+    if (['LECTURER', 'ADMIN'].includes(existingUser.role)) {
+      return res.status(403).json({ message: 'Cannot change role for this account type.' });
+    }
+
+    const user = await User.findOneAndUpdate(
+      { email },
+      { role },
+      { returnDocument: 'after' }
+    );
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

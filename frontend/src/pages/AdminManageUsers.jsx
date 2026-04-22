@@ -16,7 +16,7 @@ export default function AdminManageUsers() {
 
     const stored = localStorage.getItem('userInfo');
     if (!stored) {
-      navigate('/signin');
+      navigate('/admin');
       return;
     }
 
@@ -28,7 +28,7 @@ export default function AdminManageUsers() {
       return;
     }
 
-    if (parsed.role?.toLowerCase() !== 'admin') {
+    if (parsed.role !== 'ADMIN') {
       navigate('/');
       return;
     }
@@ -151,7 +151,7 @@ export default function AdminManageUsers() {
           <div className="flex items-center gap-3 self-start md:self-auto">
             <button
               type="button"
-              onClick={() => navigate('/admin-dashboard')}
+              onClick={() => navigate('/admin')}
               className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
             >
               
@@ -163,9 +163,9 @@ export default function AdminManageUsers() {
               className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm"
             >
               <option value="all">All roles</option>
-              <option value="student">Students</option>
-              <option value="lecturer">Lecturers</option>
-              <option value="admin">Admins</option>
+              <option value="STUDENT">Students</option>
+              <option value="LECTURER">Lecturers</option>
+              <option value="ADMIN">Admins</option>
             </select>
           </div>
         </header>

@@ -23,11 +23,11 @@ export default function AdminSessionsOverview() {
     try {
       parsed = JSON.parse(stored);
     } catch {
-      navigate('/signin');
+      navigate('/admin');
       return;
     }
 
-    if (parsed.role?.toLowerCase() !== 'admin') {
+    if (parsed.role !== 'ADMIN') {
       navigate('/');
       return;
     }
@@ -78,7 +78,7 @@ ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
           </div>
           <button
             type="button"
-            onClick={() => navigate('/admin-dashboard')}
+            onClick={() => navigate('/admin')}
             className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
           >
             Back to Dashboard

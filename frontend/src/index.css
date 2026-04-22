@@ -44,6 +44,10 @@
   color: #0f172a;
   box-shadow: 0 4px 16px 0 #f5a62344;
 }
+
+
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

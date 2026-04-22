@@ -5,13 +5,12 @@ const userSchema = mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    lecturerId: { type: String },
-    studentId: { type: String },
-    role: {
-      type: String,
-      enum: ['junior', 'senior', 'both', 'lecturer', 'student', 'admin'], // Only lowercase roles allowed
-      default: 'junior',
+    role: { 
+      type: String, 
+      enum: ['junior', 'senior', 'both','STUDENT', 'LECTURER', 'ADMIN'], 
     },
+    universityId:{type: String},
+    
     batch_details: {
       year: Number,
       semester: Number,

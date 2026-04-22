@@ -33,7 +33,7 @@ const ResourceAssistant = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await axios.get(`${API}/resources`, authCfg());
+        const res = await axios.get(`${API}/resources?limit=100`, authCfg());
         setResources(res.data.data || []);
       } catch {
         // silently fail — assistant still works without resource context

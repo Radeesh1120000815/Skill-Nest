@@ -3,6 +3,7 @@ import cors from 'cors';
 
 
 import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import groupRoutes from './routes/groupRoutes.js'; 
 import quizRoutes from './routes/quizRoutes.js';
 import lecturerRoutes from './routes/lecturerRoutes.js';
@@ -14,6 +15,10 @@ import adminRoutes from './routes/adminRoutes.js';
 import resourceRoutes      from './routes/resourceRoutes.js';
 import bookmarkRoutes      from './routes/bookmarkRoutes.js';
 import adminResourceRoutes from './routes/adminResourceRoutes.js';
+
+//Session and Lecturer Routes
+import lecturerRoutes from './routes/lecturerRoutes.js';
+import sessionRoutes  from './routes/sessionRoutes.js';
 
 //Booking Routes
 import bookingRoutes from './routes/bookingRoutes.js';
@@ -37,19 +42,22 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id']
 }));
 
+//const userRoutes = require("./routes/userRoutes");
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Required for multipart form fields
 
 
 
 // API Endpoints
-app.use('/api/auth', authRoutes); 
+app.use('/api/auth', authRoutes);
+app.use("/api/users", userRoutes); 
 app.use('/api/groups', groupRoutes); 
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/resources',        resourceRoutes);      // Public + auth resource endpoints
 app.use('/api/bookmarks',        bookmarkRoutes);      // GET /api/bookmarks/my
 app.use('/api/admin/resources',  adminResourceRoutes); // Admin approval queue
-app.use('/api/admin', adminRoutes);
+//app.use('/api/admin', adminRoutes);
 app.use('/api/sessions', sessionRoutes); //session route registration
 app.use('/api/lecturers', lecturerRoutes);
 app.use('/api/bookings',bookingRoutes); //

@@ -108,6 +108,7 @@ function App() {
           <Route path="/main-forgot" element={<MainForgot />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
 
+
           {/* Private: any authenticated user can upload */}
           <Route
             path="/upload-resource"

@@ -200,7 +200,7 @@ export default function LecturerCreateSession() {
           <div>
             <label className="block text-sm font-semibold text-slate-900 mb-1">Description</label>
             <textarea
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm  bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-h-[96px]"
+              className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-sm bg-slate-50 text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all placeholder-slate-300 min-h-[160px]"
               placeholder="What will students learn in this session?"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -239,7 +239,7 @@ export default function LecturerCreateSession() {
           <div>
             <label className="block text-sm font-semibold text-slate-900 mb-1">Duration</label>
             <select
-              className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-sm bg-slate-50 text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all"
+              className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-sm bg-slate-50 text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all appearance-none"
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
               required

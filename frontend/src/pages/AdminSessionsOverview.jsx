@@ -37,7 +37,7 @@ export default function AdminSessionsOverview() {
         setLoading(true);
         setError('');
 
-        const backendUrl = 'http://localhost:5000';
+        const backendUrl = 'http://localhost:5001';
         const token = parsed.token;
 
         const { data } = await axios.get(`${backendUrl}/api/admin/sessions`, {

@@ -61,6 +61,10 @@ export default function AdminDashboard() {
   });
 
   useEffect(() => {
+    document.title = 'Admin Dashboard — Skill Nest';
+  }, []);
+
+  useEffect(() => {
     if (user && user.role !== 'ADMIN') navigate('/resources');
     if (!user) navigate('/login');
   }, []);

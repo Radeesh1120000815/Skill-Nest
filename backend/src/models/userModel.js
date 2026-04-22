@@ -9,12 +9,23 @@ const userSchema = mongoose.Schema(
       type: String, 
       enum: ['junior', 'senior', 'both','STUDENT', 'LECTURER', 'ADMIN'], 
     },
+<<<<<<< HEAD
+    universityId: { type: String },
+=======
     universityId:{type: String},
+>>>>>>> origin/Lecture-Sessions
     
     batch_details: {
       year: Number,
       semester: Number,
       specialization: String,
+    },
+
+    // Account status for admin management
+    status: {
+      type: String,
+      enum: ['active', 'blocked'],
+      default: 'active',
     },
     
     // 🔴 Gamification: Badges array with timestamp

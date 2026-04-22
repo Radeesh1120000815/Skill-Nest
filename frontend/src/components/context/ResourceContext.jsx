@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const ResourceContext = createContext();
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'http://localhost:5001/api';
 
 // Helper: inject auth header when token exists in localStorage
 const authHeader = () => {

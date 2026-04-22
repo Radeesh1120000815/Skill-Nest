@@ -13,9 +13,21 @@ import User from '../models/userModel.js';
 
 const router = express.Router();
 
+
 // 🔓 Public routes
 router.post('/register', registerUser);
 router.post('/login', loginUser);
+
+// 🟢 Public: Get all users (for sign-up page display)
+router.get('/all-users', async (req, res) => {
+  try {
+    // Only select safe fields
+    const users = await User.find({}, 'name email lecturerId role');
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error fetching users' });
+  }
+});
 
 // 🔐 Password Reset Routes 
 router.post('/forgot-password', forgotPassword);

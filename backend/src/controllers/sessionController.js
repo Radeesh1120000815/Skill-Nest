@@ -30,7 +30,7 @@ export const createSession = async (req, res) => {
       return res.status(400).json({ message: 'Please fill in all required fields.' });
     }
 
-    const session = await Session.create({
+    const sessionPayload = {
       lecturer: req.user._id,
       lecturerName: req.user.name,   // denormalise so student views don't need populate
       title,
@@ -39,10 +39,17 @@ export const createSession = async (req, res) => {
       description: description || '',
       date: new Date(date),
       durationMinutes: Number(duration),
-      sessionLink: sessionLink || '',
-      time: time || '',
       tags: tags || [],
-    });
+    };
+
+    if (typeof sessionLink === 'string' && sessionLink.trim()) {
+      sessionPayload.sessionLink = sessionLink.trim();
+    }
+    if (typeof time === 'string' && time.trim()) {
+      sessionPayload.time = time.trim();
+    }
+
+    const session = await Session.create(sessionPayload);
 
     return res.status(201).json({ message: 'Session created successfully', session });
   } catch (error) {
@@ -114,8 +121,16 @@ export const updateSession = async (req, res) => {
     if (description !== undefined) session.description = description;
     if (date !== undefined) session.date = new Date(date);
     if (duration !== undefined) session.durationMinutes = Number(duration);
-    if (sessionLink !== undefined) session.sessionLink = sessionLink;
-    if (time !== undefined) session.time = time;
+    if (sessionLink !== undefined) {
+      const cleanedSessionLink = String(sessionLink || '').trim();
+      if (cleanedSessionLink) session.sessionLink = cleanedSessionLink;
+      else session.set('sessionLink', undefined);
+    }
+    if (time !== undefined) {
+      const cleanedTime = String(time || '').trim();
+      if (cleanedTime) session.time = cleanedTime;
+      else session.set('time', undefined);
+    }
     if (tags !== undefined) session.tags = tags;
     if (status !== undefined) session.status = status;
 

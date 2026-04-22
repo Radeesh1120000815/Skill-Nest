@@ -5,7 +5,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { ArrowLeft, PlayCircle, CheckCircle, Star, Calendar, Clock, User, ExternalLink } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
+const API = 'http://localhost:5001/api';
 
 const fmtDuration = (mins) =>
   mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60 > 0 ? `${mins % 60}m` : ''}`.trim() : `${mins}m`;
@@ -17,6 +17,16 @@ const WatchSession = () => {
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    document.title = 'Watch Session — Skill Nest';
+  }, []);
+
+  useEffect(() => {
+    if (booking?.sessionId?.title) {
+      document.title = `${booking.sessionId.title} — Watch Session — Skill Nest`;
+    }
+  }, [booking]);
 
   useEffect(() => {
     const info = JSON.parse(localStorage.getItem('userInfo') || 'null');

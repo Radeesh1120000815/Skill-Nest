@@ -168,7 +168,7 @@ const SeniorDashboard = () => {
     try {
       const config = { headers: { Authorization: `Bearer ${token || JSON.parse(localStorage.getItem('userInfo')).token}` } };
       
-      const profileRes = await axios.get('http://localhost:5000/api/auth/profile', config);
+      const profileRes = await axios.get('http://localhost:5001/api/auth/profile', config);
       const dbRole = profileRes.data.role?.toLowerCase();
       if (dbRole === 'junior' || dbRole === 'student') {
         navigate('/junior-dashboard', { replace: true });
@@ -189,10 +189,10 @@ const SeniorDashboard = () => {
         bio: localExtras.bio || ''
       }));
 
-      const groupRes = await axios.get('http://localhost:5000/api/groups', config);
+      const groupRes = await axios.get('http://localhost:5001/api/groups', config);
       setMyGroups(groupRes.data.reverse()); 
 
-      const mentorRes = await axios.get('http://localhost:5000/api/auth/mentors', config); 
+      const mentorRes = await axios.get('http://localhost:5001/api/auth/mentors', config); 
       setGlobalMentors(mentorRes.data);
 
     } catch (error) {
@@ -348,7 +348,7 @@ const SeniorDashboard = () => {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
       const dataToSend = { ...formData, senior_id: user._id };
-      const response = await axios.post('http://localhost:5000/api/groups/create', dataToSend, config);
+      const response = await axios.post('http://localhost:5001/api/groups/create', dataToSend, config);
       alert(`🎉 Session created! You earned +500 XP!`);
       setIsModalOpen(false); 
       setFormData({ module_name: '', max_members: 10, session_link: '', semester: '', quiz_link: '' }); 
@@ -377,7 +377,7 @@ const SeniorDashboard = () => {
       const token = userInfoStr ? JSON.parse(userInfoStr).token : '';
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      const response = await axios.put(`http://localhost:5000/api/groups/update/${editModal.groupId}`, editModal.formData, config);
+      const response = await axios.put(`http://localhost:5001/api/groups/update/${editModal.groupId}`, editModal.formData, config);
       alert(`✅ ${response.data.message}`);
       setEditModal({ isOpen: false, groupId: null, formData: null });
       fetchMentorData(token);
@@ -396,7 +396,7 @@ const SeniorDashboard = () => {
       const token = userInfoStr ? JSON.parse(userInfoStr).token : '';
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      const response = await axios.delete(`http://localhost:5000/api/groups/delete/${groupId}`, config);
+      const response = await axios.delete(`http://localhost:5001/api/groups/delete/${groupId}`, config);
       alert(`🗑️ ${response.data.message}`);
       fetchMentorData(token);
     } catch (error) {
@@ -410,7 +410,7 @@ const SeniorDashboard = () => {
       const token = userInfoStr ? JSON.parse(userInfoStr).token : '';
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      const response = await axios.put(`http://localhost:5000/api/groups/approve/${groupId}/${studentId}`, {}, config);
+      const response = await axios.put(`http://localhost:5001/api/groups/approve/${groupId}/${studentId}`, {}, config);
       alert(`✅ Student approved! You earned +150 XP!`);
       fetchMentorData(token); 
     } catch (error) {
@@ -426,7 +426,7 @@ const SeniorDashboard = () => {
       const token = userInfoStr ? JSON.parse(userInfoStr).token : '';
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      const response = await axios.delete(`http://localhost:5000/api/groups/reject/${groupId}/${studentId}`, config);
+      const response = await axios.delete(`http://localhost:5001/api/groups/reject/${groupId}/${studentId}`, config);
       alert(`🗑️ ${response.data.message}`);
       fetchMentorData(token); 
     } catch (error) {
@@ -441,7 +441,7 @@ const SeniorDashboard = () => {
       const token = userInfoStr ? JSON.parse(userInfoStr).token : '';
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      const response = await axios.get(`http://localhost:5000/api/groups/${group._id}/students`, config);
+      const response = await axios.get(`http://localhost:5001/api/groups/${group._id}/students`, config);
       setManageModal(prev => ({ ...prev, students: response.data, isLoading: false }));
     } catch (error) {
       console.error("Failed to fetch students:", error);
@@ -456,7 +456,7 @@ const SeniorDashboard = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const response = await axios.post(`http://localhost:5000/api/auth/award-badge/${studentId}`, { badgeName }, config );
+      const response = await axios.post(`http://localhost:5001/api/auth/award-badge/${studentId}`, { badgeName }, config );
       alert(`🎉 ${response.data.message}`);
       setManageModal(prev => ({
         ...prev,
@@ -480,7 +480,7 @@ const SeniorDashboard = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const response = await axios.put(`http://localhost:5000/api/auth/update-badge/${studentId}/${badgeId}`, { badgeName: newBadgeName }, config);
+      const response = await axios.put(`http://localhost:5001/api/auth/update-badge/${studentId}/${badgeId}`, { badgeName: newBadgeName }, config);
       alert(`✅ ${response.data.message}`);
       setManageModal(prev => ({
         ...prev,
@@ -502,7 +502,7 @@ const SeniorDashboard = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const response = await axios.delete(`http://localhost:5000/api/auth/delete-badge/${studentId}/${badgeId}`, config);
+      const response = await axios.delete(`http://localhost:5001/api/auth/delete-badge/${studentId}/${badgeId}`, config);
       alert(`✅ ${response.data.message}`);
       setManageModal(prev => ({
         ...prev,
@@ -528,7 +528,7 @@ const SeniorDashboard = () => {
 
       const groupId = manageModal.group?._id; 
       if(!groupId) return alert("⚠️ Error: Group ID not found!");
-      const response = await axios.delete(`http://localhost:5000/api/groups/${groupId}/remove-student/${studentId}`, config);
+      const response = await axios.delete(`http://localhost:5001/api/groups/${groupId}/remove-student/${studentId}`, config);
       alert(`✅ ${response.data.message}`);
       setManageModal(prev => ({ ...prev, students: prev.students.filter(student => student._id !== studentId) }));
       fetchMentorData(token);
@@ -1145,7 +1145,15 @@ const SeniorDashboard = () => {
                               Cancel
                             </button>
                             <button onClick={() => {
+<<<<<<< HEAD
+                                if(thread.length === 0 && !msg.reply) {
+                                  handleReplySubmit(msg.id); // Use old method for first reply compatibility
+                                } else {
+                                  handleThreadReply(msg.id); // Append to thread array
+                                }
+=======
                                 handleThreadReply(msg.id); // ← use this for all cases
+>>>>>>> origin/Lecture-Sessions
                               }} 
                               disabled={!replyText.trim() || replyText.length > 500} className="flex-1 sm:flex-none px-8 py-3.5 text-xs font-black text-white bg-gradient-to-r from-fuchsia-600 to-indigo-600 hover:from-fuchsia-500 hover:to-indigo-500 rounded-2xl shadow-xl shadow-fuchsia-500/30 transition-all flex items-center justify-center hover:-translate-y-1 group/send disabled:opacity-50 disabled:hover:translate-y-0">
                               Send Reply <Send className="w-4 h-4 ml-2 group-hover/send:translate-x-1 group-hover/send:-translate-y-1 transition-transform" />

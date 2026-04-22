@@ -10,7 +10,7 @@ import {
   AlertCircle, PlayCircle, Edit3, Trash2,
 } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
+const API = 'http://localhost:5001/api';
 
 const authCfg = () => {
   const u = JSON.parse(localStorage.getItem('userInfo') || 'null');
@@ -237,6 +237,15 @@ const StudentDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const titleByTab = {
+      dashboard: 'Student Dashboard — Skill Nest',
+      enrolled: 'My Sessions — Skill Nest',
+      profile: 'My Profile — Skill Nest',
+    };
+    document.title = titleByTab[activeTab] || 'Student Dashboard — Skill Nest';
+  }, [activeTab]);
+
+  useEffect(() => {
     const hr = new Date().getHours();
     setGreeting(hr < 12 ? 'Good Morning' : hr < 18 ? 'Good Afternoon' : 'Good Evening');
 
@@ -306,7 +315,16 @@ const StudentDashboard = () => {
   const bookingMap = {};
   myBookings.forEach((b) => { if (b.sessionId?._id) bookingMap[b.sessionId._id] = b; });
 
-  const filtered = sessions.filter((s) => {
+  const isSessionNotExpired = (session) => {
+    const startMs = new Date(session?.date).getTime();
+    if (!Number.isFinite(startMs)) return false;
+    const durationMs = Number(session?.durationMinutes || 60) * 60 * 1000;
+    return startMs + durationMs > Date.now();
+  };
+
+  const availableSessions = sessions.filter(isSessionNotExpired);
+
+  const filtered = availableSessions.filter((s) => {
     const q = search.toLowerCase();
     return s.title.toLowerCase().includes(q) || s.subject.toLowerCase().includes(q) || (s.lecturerName || '').toLowerCase().includes(q);
   });
@@ -342,7 +360,7 @@ const StudentDashboard = () => {
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-indigo-300">Journey Awaits.</span>
             </h2>
             <p className="text-slate-300 text-base max-w-lg font-medium">
-              Explore <span className="text-white font-black bg-white/10 px-2 py-1 rounded-lg">{sessions.length} live sessions</span> — book, watch, and grow.
+              Explore <span className="text-white font-black bg-white/10 px-2 py-1 rounded-lg">{availableSessions.length} live sessions</span> — book, watch, and grow.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
@@ -350,7 +368,7 @@ const StudentDashboard = () => {
               { label: 'Enrolled', value: approved.length, icon: BookOpen, color: 'text-blue-300' },
               { label: 'Pending', value: pending.length, icon: Clock, color: 'text-amber-300' },
               { label: 'Completed', value: completed.length, icon: CheckCircle, color: 'text-emerald-300' },
-              { label: 'Available', value: sessions.length, icon: Calendar, color: 'text-indigo-300' },
+              { label: 'Available', value: availableSessions.length, icon: Calendar, color: 'text-indigo-300' },
             ].map((s) => (
               <div key={s.label} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 text-center">
                 <s.icon className={`w-5 h-5 ${s.color} mx-auto mb-2`} />
@@ -518,10 +536,16 @@ const StudentDashboard = () => {
                   <div className="flex flex-wrap gap-3">
                     {booking.status === 'approved' && !booking.isCompleted && (
                       <>
-                        <button onClick={() => navigate(`/watch-session/${booking._id}`)}
-                          className="flex items-center px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl shadow-lg text-sm">
-                          <PlayCircle className="w-4 h-4 mr-2" /> Watch Now
-                        </button>
+                        {s.sessionLink ? (
+                          <button onClick={() => navigate(`/watch-session/${booking._id}`)}
+                            className="flex items-center px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl shadow-lg text-sm">
+                            <PlayCircle className="w-4 h-4 mr-2" /> Watch Now
+                          </button>
+                        ) : (
+                          <div className="flex items-center px-5 py-3 bg-indigo-50 text-indigo-700 font-black rounded-2xl border border-indigo-200 text-sm">
+                            Video link pending
+                          </div>
+                        )}
                         <button onClick={() => handleMarkComplete(booking._id)}
                           className="flex items-center px-5 py-3 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 font-black rounded-2xl border border-emerald-200 transition-all text-sm">
                           <CheckCircle className="w-4 h-4 mr-2" /> Mark Complete
@@ -681,7 +705,7 @@ const StudentDashboard = () => {
 
         {/* Main */}
         <main className="flex-1 md:pl-[290px] flex flex-col w-full relative z-10 min-h-screen">
-          <header className="h-24 flex items-center justify-between px-8 sticky top-[68px] z-30 bg-[#F4F7FE]/90 backdrop-blur-md border-b border-white/50 shadow-sm">
+          <header className="h-24 flex items-center justify-between px-8 bg-[#F4F7FE] border-b border-white/50 shadow-sm">
             <div className="hidden md:flex items-center bg-white rounded-2xl px-4 py-2.5 shadow-sm border border-slate-100">
               <GraduationCap className="w-4 h-4 text-indigo-600 mr-2" />
               <span className="text-sm font-black text-slate-700">Student Portal</span>

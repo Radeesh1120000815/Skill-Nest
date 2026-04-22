@@ -18,7 +18,7 @@ const ForgotPassword = () => {
 
     try {
       // 🔴 Port 5001 API Call
-      const response = await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+      const response = await axios.post('http://localhost:5001/api/auth/forgot-password', { email });
       setMessage(response.data.message);
       setEmail(''); // Clear input after success
     } catch (err) {

@@ -141,7 +141,7 @@ const JuniorDashboard = () => {
   const fetchData = async (token) => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const profileRes = await axios.get('http://localhost:5000/api/auth/profile', config);
+      const profileRes = await axios.get('http://localhost:5001/api/auth/profile', config);
       
       const dbRole = profileRes.data.role?.toLowerCase();
       if (dbRole === 'senior' || dbRole === 'mentor') {
@@ -163,10 +163,10 @@ const JuniorDashboard = () => {
         bio: localExtras.bio || ''
       }));
 
-      const groupRes = await axios.get('http://localhost:5000/api/groups', config);
+      const groupRes = await axios.get('http://localhost:5001/api/groups', config);
       setGroups(groupRes.data.reverse());
 
-      const mentorRes = await axios.get('http://localhost:5000/api/auth/mentors', config); 
+      const mentorRes = await axios.get('http://localhost:5001/api/auth/mentors', config); 
       setMentors(mentorRes.data);
 
     } catch (error) {
@@ -186,7 +186,7 @@ const JuniorDashboard = () => {
       const token = userInfoStr ? JSON.parse(userInfoStr).token : '';
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      const response = await axios.put(`http://localhost:5000/api/groups/join/${groupId}`, {
+      const response = await axios.put(`http://localhost:5001/api/groups/join/${groupId}`, {
         userId: user?._id 
       }, config);
       
@@ -208,7 +208,7 @@ const JuniorDashboard = () => {
       const token = userInfoStr ? JSON.parse(userInfoStr).token : '';
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      const response = await axios.delete(`http://localhost:5000/api/groups/${groupId}/remove-student/${user?._id}`, config);
+      const response = await axios.delete(`http://localhost:5001/api/groups/${groupId}/remove-student/${user?._id}`, config);
       alert(`✅ Successfully dropped from ${moduleName}`);
       if(userInfoStr) {
         fetchData(JSON.parse(userInfoStr).token); 

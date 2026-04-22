@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+=======
 .signin-input-error {
   border: 1.5px solid #dc2626 !important;
 }
@@ -51,6 +53,7 @@
   box-shadow: 0 6px 24px #1e40af33;
   transform: translateY(-2px) scale(1.02);
 }
+>>>>>>> origin/Lecture-Sessions
 .signin-link-underline {
   color: #2563eb;
   font-weight: 600;

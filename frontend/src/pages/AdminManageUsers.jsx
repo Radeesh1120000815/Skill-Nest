@@ -38,7 +38,7 @@ export default function AdminManageUsers() {
         setLoading(true);
         setError('');
 
-        const backendUrl = 'http://localhost:5000';
+        const backendUrl = 'http://localhost:5001';
         const token = parsed.token;
 
         const params = {};
@@ -79,7 +79,7 @@ export default function AdminManageUsers() {
     }
 
     try {
-      const backendUrl = 'http://localhost:5000';
+      const backendUrl = 'http://localhost:5001';
       const token = parsed.token;
 
       const { data } = await axios.patch(
@@ -114,7 +114,7 @@ export default function AdminManageUsers() {
     }
 
     try {
-      const backendUrl = 'http://localhost:5000';
+      const backendUrl = 'http://localhost:5001';
       const token = parsed.token;
 
       await axios.delete(`${backendUrl}/api/admin/users/${userId}`, {

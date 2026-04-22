@@ -2,7 +2,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+<<<<<<< HEAD
+=======
 import { useEffect, useState } from 'react';
+>>>>>>> origin/Lecture-Sessions
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true); 
@@ -19,6 +22,8 @@ const Login = () => {
   
   const navigate = useNavigate();
 
+<<<<<<< HEAD
+=======
   // Pre-fill from main system login
   useEffect(() => {
     const mainUser = JSON.parse(localStorage.getItem('userInfo') || 'null');
@@ -29,7 +34,8 @@ const Login = () => {
     }
   }, []);
 
-  const API_URL = 'http://localhost:5000/api/auth';
+>>>>>>> origin/Lecture-Sessions
+  const API_URL = 'http://localhost:5001/api/auth';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,8 +52,12 @@ const Login = () => {
 
       localStorage.setItem('userInfo', JSON.stringify(response.data));
       const userRole = response.data.role?.toLowerCase();
-      
-      if (userRole === 'senior' || userRole === 'mentor' || userRole === 'both') {
+
+      if (userRole === 'admin') {
+        navigate('/admin-dashboard');
+      } else if (userRole === 'lecturer') {
+        navigate('/lecturer-dashboard');
+      } else if (userRole === 'senior' || userRole === 'mentor' || userRole === 'both') {
         navigate('/senior-dashboard');
       } else {
         navigate('/junior-dashboard');

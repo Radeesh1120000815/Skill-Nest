@@ -24,7 +24,7 @@ export default function LecturerCompletedSessions() {
     if (parsed.role !== 'LECTURER') { navigate('/signin', { replace: true }); return; }
 
     try {
-      const backendUrl = 'http://localhost:5000';
+      const backendUrl = 'http://localhost:5001';
       const token = parsed?.token;
       const userId = parsed?._id;
 

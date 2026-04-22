@@ -29,6 +29,10 @@ export default function AdminResourceQueue() {
   const [toastMsg,     setToastMsg]     = useState({ type:'', text:'' });
 
   useEffect(() => {
+    document.title = 'Admin Resource Queue — Skill Nest';
+  }, []);
+
+  useEffect(() => {
     fetchPendingQueue();
     fetchAdminStats();
   }, []);

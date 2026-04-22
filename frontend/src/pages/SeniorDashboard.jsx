@@ -223,7 +223,7 @@ const SeniorDashboard = () => {
   const fetchMentorData = async (token) => {
     try {
       const config = { headers: { Authorization: `Bearer ${token || JSON.parse(localStorage.getItem('userInfo')).token}` } };
-
+      
       const profileRes = await axios.get('http://localhost:5001/api/auth/profile', config);
       const dbRole = profileRes.data.role?.toLowerCase();
       if (dbRole === 'junior' || dbRole === 'student') {

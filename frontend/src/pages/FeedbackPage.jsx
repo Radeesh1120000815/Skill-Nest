@@ -27,6 +27,16 @@ const FeedbackPage = () => {
   const ratingLabels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
 
   useEffect(() => {
+    document.title = 'Session Feedback — Skill Nest';
+  }, []);
+
+  useEffect(() => {
+    if (booking?.sessionId?.title) {
+      document.title = `${booking.sessionId.title} — Feedback — Skill Nest`;
+    }
+  }, [booking]);
+
+  useEffect(() => {
     const info = JSON.parse(localStorage.getItem('userInfo') || 'null');
     const validStudentRoles = ['STUDENT', 'junior', 'senior', 'both'];
     if (!info || !validStudentRoles.includes(info.role)) { navigate('/signin', { replace: true }); return; }

@@ -69,6 +69,10 @@ export default function ResourceHub() {
   const location = useLocation();
   const user     = JSON.parse(localStorage.getItem('userInfo') || 'null');
 
+  useEffect(() => {
+    document.title = 'Resource Hub — Skill Nest';
+  }, []);
+
   const [filters, setFilters] = useState({
     search:'', moduleCode:'', academicYear:'', semester:'', type:'', sort:'newest',
   });

@@ -285,9 +285,26 @@ export const approveBooking = async (req, res) => {
       return res.status(403).json({ message: 'Not authorised.' });
     }
  
+    const sessionLink = String(req.body?.sessionLink || '').trim();
+
+    if (sessionLink) {
+      try {
+        const parsedUrl = new URL(sessionLink);
+        if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+          return res.status(400).json({ message: 'Session link must start with http or https.' });
+        }
+      } catch {
+        return res.status(400).json({ message: 'Please provide a valid video/session link.' });
+      }
+    }
+
     booking.status       = 'approved';
     booking.lecturerNote = req.body.note || '';
     await booking.save();
+
+    if (sessionLink) {
+      await Session.findByIdAndUpdate(booking.sessionId, { sessionLink });
+    }
  
     return res.json({ message: 'Booking approved! ✅', data: booking });
   } catch (error) {

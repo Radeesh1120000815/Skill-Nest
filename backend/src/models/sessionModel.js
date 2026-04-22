@@ -48,12 +48,10 @@ const sessionSchema = new mongoose.Schema(
     //  Added for student booking flow 
     sessionLink: {
       type: String,
-      default: '',
       trim: true,
     },
     time: {
       type: String,   // e.g. "10:00 AM" — stored as string for display
-      default: '',
       trim: true,
     },
     currentEnrollments: {

@@ -194,13 +194,22 @@ export default function LecturerSessions() {
     <div className="min-h-screen flex flex-col bg-[#f5f7f2]">
       <Navbar />
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
-        <header className="mb-6">
-          <h1 className="text-3xl font-extrabold text-slate-900">My Sessions</h1>
-          <p className="text-slate-600 mt-2 max-w-2xl text-sm">
-            This page shows all the sessions i have created as a lecturer.
-            I can quickly review the key details, update information when plans change,
-            and remove sessions that are no longer needed.
-          </p>
+        <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-extrabold text-slate-900">My Sessions</h1>
+            <p className="text-slate-600 mt-2 max-w-2xl text-sm">
+              This page shows all the sessions i have created as a lecturer.
+              I can quickly review the key details, update information when plans change,
+              and remove sessions that are no longer needed.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/lecturer-dashboard')}
+            className="inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50"
+          >
+            Back to Dashboard
+          </button>
         </header>
 
         {error && (

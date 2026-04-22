@@ -160,7 +160,6 @@ export default function Register() {
           <a className="ml-2 nav-btn bg-amber-400 text-slate-900 font-bold px-4 py-2 rounded-lg hover:bg-amber-500 transition" href="/signin">Sign In</a>
         </div>
       </nav>
-
       <main className="flex-1 flex items-center justify-center py-10 px-2">
         <div className="reg-card bg-white rounded-3xl p-8 max-w-lg w-full shadow-xl animate-fadeUp">
           <div className="flex items-center gap-2 justify-center mb-6">

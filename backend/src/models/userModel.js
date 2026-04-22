@@ -16,6 +16,13 @@ const userSchema = mongoose.Schema(
       semester: Number,
       specialization: String,
     },
+
+    // Account status for admin management
+    status: {
+      type: String,
+      enum: ['active', 'blocked'],
+      default: 'active',
+    },
     
     // 🔴 Gamification: Badges array with timestamp
     badges: [

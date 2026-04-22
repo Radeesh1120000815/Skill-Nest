@@ -19,6 +19,16 @@ const WatchSession = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    document.title = 'Watch Session — Skill Nest';
+  }, []);
+
+  useEffect(() => {
+    if (booking?.sessionId?.title) {
+      document.title = `${booking.sessionId.title} — Watch Session — Skill Nest`;
+    }
+  }, [booking]);
+
+  useEffect(() => {
     const info = JSON.parse(localStorage.getItem('userInfo') || 'null');
     const validStudentRoles = ['STUDENT', 'junior', 'senior', 'both'];
     if (!info || !validStudentRoles.includes(info.role)) { navigate('/signin', { replace: true }); return; }

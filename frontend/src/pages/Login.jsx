@@ -45,8 +45,12 @@ const Login = () => {
 
       localStorage.setItem('userInfo', JSON.stringify(response.data));
       const userRole = response.data.role?.toLowerCase();
-      
-      if (userRole === 'senior' || userRole === 'mentor' || userRole === 'both') {
+
+      if (userRole === 'admin') {
+        navigate('/admin-dashboard');
+      } else if (userRole === 'lecturer') {
+        navigate('/lecturer-dashboard');
+      } else if (userRole === 'senior' || userRole === 'mentor' || userRole === 'both') {
         navigate('/senior-dashboard');
       } else {
         navigate('/junior-dashboard');

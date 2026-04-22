@@ -207,7 +207,7 @@ const JuniorDashboard = () => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       const profileRes = await axios.get('http://localhost:5001/api/auth/profile', config);
-
+      
       const dbRole = profileRes.data.role?.toLowerCase();
       if (dbRole === 'senior' || dbRole === 'mentor') {
         navigate('/senior-dashboard', { replace: true });

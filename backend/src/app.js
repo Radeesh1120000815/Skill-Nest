@@ -1,19 +1,19 @@
 import express from 'express';
 import cors from 'cors';
 
+
 import authRoutes from './routes/authRoutes.js';
 import groupRoutes from './routes/groupRoutes.js'; 
 import quizRoutes from './routes/quizRoutes.js';
+import lecturerRoutes from './routes/lecturerRoutes.js';
+import studentRoutes from './routes/studentRoutes.js';
+import sessionRoutes from './routes/sessionRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 //Resource Mnagement Routes
 import resourceRoutes      from './routes/resourceRoutes.js';
 import bookmarkRoutes      from './routes/bookmarkRoutes.js';
 import adminResourceRoutes from './routes/adminResourceRoutes.js';
-
-//Session and Lecture,Admin Session Routes
-import sessionRoutes from './routes/sessionRoutes.js';
-import lecturerRoutes from './routes/lecturerRoutes.js';
-import adminRoutes from './routes/adminRoutes.js';
 
 //Booking Routes
 import bookingRoutes from './routes/bookingRoutes.js';
@@ -23,11 +23,18 @@ import bookingRoutes from './routes/bookingRoutes.js';
 
 const app = express();
 
+// Global request logger middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  next();
+});
+
 // 🔴 Ultimate CORS Fix - සියලුම Origins සහ Headers වලට ඉඩ දීම
 app.use(cors({
   origin: '*', // Frontend එකේ මොන port එකෙන් ආවත් allow කරනවා
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  // Allow our custom x-user-id header as well so browser preflight passes
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id']
 }));
 
 app.use(express.json());
@@ -46,7 +53,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/sessions', sessionRoutes); //session route registration
 app.use('/api/lecturers', lecturerRoutes);
 app.use('/api/bookings',bookingRoutes); //
-
+app.use('/api/students', studentRoutes);
 
 // Test Route
 app.get('/', (req, res) => {

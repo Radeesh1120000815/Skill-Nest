@@ -2,7 +2,7 @@ import 'dotenv/config';
 import app from './src/app.js';
 import connectDB_Server from './src/config/db.js';
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // Connect Database first, then start server
 if (process.env.SKIP_DB === 'true') {

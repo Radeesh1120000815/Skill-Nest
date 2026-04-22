@@ -103,6 +103,7 @@ function Navbar() {
           <>
             <Link className="nav-a" to="/lecturer-dashboard" style={{ fontSize: '1rem', fontWeight: 500, color: 'rgba(255,255,255,0.75)', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px' }}>Dashboard</Link>
             <Link className="nav-a" to="/lecturer-create-session" style={{ fontSize: '1rem', fontWeight: 500, color: 'rgba(255,255,255,0.75)', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px' }}>Create Session</Link>
+            <Link className="nav-a" to="/resources" style={{ fontSize: '1rem', fontWeight: 500, color: 'rgba(255,255,255,0.75)', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px' }}>Resources</Link>
             <Link className="nav-a" to="/lecturer-sessions" style={{ fontSize: '1rem', fontWeight: 500, color: 'rgba(255,255,255,0.75)', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px' }}>Session</Link>
             <Link className="nav-a" to="/help-center" style={{ fontSize: '1rem', fontWeight: 500, color: 'rgba(255,255,255,0.75)', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px' }}>Help Center</Link>
 

@@ -12,52 +12,48 @@ export default function LecturerCompletedSessions() {
   useEffect(() => {
     document.title = 'Completed Sessions — Skill Nest';
 
-    /*const stored = localStorage.getItem('userInfo');
+    const stored = localStorage.getItem('userInfo');
     if (!stored) {
       navigate('/signin');
       return;
-    }*/
-
-    const stored = localStorage.getItem('userInfo');
-    if (!stored) { navigate('/signin'); return; }
-    const parsed = JSON.parse(stored);
-    if (parsed.role !== 'LECTURER') { navigate('/signin', { replace: true }); return; }
-
-    try {
-      const backendUrl = 'http://localhost:5001';
-      const token = parsed?.token;
-      const userId = parsed?._id;
-
-      axios
-        .get(`${backendUrl}/api/sessions/my/all`, {
-          /*headers: {
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            ...(userId ? { 'x-user-id': userId } : {}),
-          },*/
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((res) => {
-          const all = res.data || [];
-          const now = new Date();
-          const completed = all
-            .filter((session) => {
-              const startMs = new Date(session.date).getTime();
-              const durationMs = Number(session.durationMinutes || 0) * 60 * 1000;
-              return startMs + durationMs < now.getTime();
-            })
-            .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-          setCompletedSessions(completed);
-        })
-        .catch(() => {
-          setCompletedSessions([]);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } catch {
-      navigate('/signin');
     }
+    
+    const parsed = JSON.parse(stored);
+    if (parsed.role !== 'LECTURER') {
+      navigate('/signin', { replace: true });
+      return;
+    }
+
+    const backendUrl = 'http://localhost:5001';
+    const token = parsed?.token;
+
+    axios
+      .get(`${backendUrl}/api/sessions/my/all`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const all = res.data || [];
+        const now = new Date().getTime();
+
+        const completed = all
+        .filter((session) => {
+          if (!session.date) return false;
+          const startMs = new Date(session.date).getTime();
+          // Change: Check against start time so it shows up immediately
+          //  // rather than waiting for the duration to finish.
+           return startMs <= now; 
+          })
+          .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        setCompletedSessions(completed);
+      })
+      .catch((err) => {
+        console.error("Error fetching sessions:", err);
+        setCompletedSessions([]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [navigate]);
 
   const formatDateTime = (iso) => {
@@ -109,10 +105,7 @@ export default function LecturerCompletedSessions() {
                   <p className="text-xs text-slate-500 mt-1">
                     {session.subject}
                     {session.date && (
-                      <>
-                        {' '}
-                        • Ended after {formatDateTime(session.date)}
-                      </>
+                      <> • Ended after {formatDateTime(session.date)}</>
                     )}
                   </p>
                   <p className="text-xs text-slate-500 mt-1">

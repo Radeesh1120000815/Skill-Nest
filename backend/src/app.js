@@ -16,9 +16,6 @@ import resourceRoutes      from './routes/resourceRoutes.js';
 import bookmarkRoutes      from './routes/bookmarkRoutes.js';
 import adminResourceRoutes from './routes/adminResourceRoutes.js';
 
-//Session and Lecturer Routes
-import lecturerRoutes from './routes/lecturerRoutes.js';
-import sessionRoutes  from './routes/sessionRoutes.js';
 
 //Booking Routes
 import bookingRoutes from './routes/bookingRoutes.js';

@@ -5,6 +5,7 @@ import StarRatingInput from '../components/resources/StarRatingInput.jsx';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
 import { T, Icon, sharedStyles, typeStyle, statusStyle, roleStyle } from '../components/resources/theme.jsx';
+import ResourceAssistant from '../components/ResourceAssistant.jsx';
 
 // Constants
 const INTENT_OPTIONS = [
@@ -460,6 +461,7 @@ export default function ResourceDetail() {
           </div>
         </div>
       )}
+      <ResourceAssistant />
     </>
   );
 }

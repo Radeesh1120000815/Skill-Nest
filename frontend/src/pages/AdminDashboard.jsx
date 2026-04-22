@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
 import { T, Icon, sharedStyles } from '../components/resources/theme.jsx';
+import ResourceAssistant from '../components/ResourceAssistant.jsx';
 
 const SIDEBAR_SECTIONS = [
    {

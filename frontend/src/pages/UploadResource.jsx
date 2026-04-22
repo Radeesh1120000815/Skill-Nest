@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
 import ResourceBanner from '../components/resources/ResourceBanner.jsx';
 import { T, Icon, sharedStyles } from '../components/resources/theme.jsx';
+import ResourceAssistant from '../components/ResourceAssistant.jsx';
 
 
 
@@ -353,6 +354,7 @@ export default function UploadResource() {
           </div>
         </div>
       </div>
+      <ResourceAssistant />
     </>
   );
 }

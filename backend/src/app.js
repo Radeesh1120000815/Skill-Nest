@@ -15,6 +15,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import resourceRoutes      from './routes/resourceRoutes.js';
 import bookmarkRoutes      from './routes/bookmarkRoutes.js';
 import adminResourceRoutes from './routes/adminResourceRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 
 
 //Booking Routes
@@ -54,7 +55,8 @@ app.use('/api/quizzes', quizRoutes);
 app.use('/api/resources',        resourceRoutes);      // Public + auth resource endpoints
 app.use('/api/bookmarks',        bookmarkRoutes);      // GET /api/bookmarks/my
 app.use('/api/admin/resources',  adminResourceRoutes); // Admin approval queue
-//app.use('/api/admin', adminRoutes);
+app.use('/api/ai', aiRoutes); // AI interaction endpoints
+
 app.use('/api/sessions', sessionRoutes); //session route registration
 app.use('/api/lecturers', lecturerRoutes);
 app.use('/api/bookings',bookingRoutes); //

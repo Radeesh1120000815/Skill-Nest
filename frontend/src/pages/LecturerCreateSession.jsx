@@ -162,7 +162,7 @@ export default function LecturerCreateSession() {
             <label className="block text-sm font-semibold text-slate-900 mb-1">Session Title</label>
             <input
               type="text"
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm  bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="e.g. Advanced React Patterns"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -178,7 +178,7 @@ export default function LecturerCreateSession() {
               <label className="block text-sm font-semibold text-slate-900 mb-1">Subject</label>
               <input
                 type="text"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm  bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="e.g. Data Structures"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
@@ -193,7 +193,7 @@ export default function LecturerCreateSession() {
               <input
                 type="number"
                 min="1"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm  bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 value={maxStudents}
                 onChange={(e) => setMaxStudents(e.target.value)}
                 required
@@ -207,7 +207,7 @@ export default function LecturerCreateSession() {
           <div>
             <label className="block text-sm font-semibold text-slate-900 mb-1">Description</label>
             <textarea
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-h-[96px]"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm  bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-h-[96px]"
               placeholder="What will students learn in this session?"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -219,7 +219,7 @@ export default function LecturerCreateSession() {
               <label className="block text-sm font-semibold text-slate-900 mb-1">Date</label>
               <input
                 type="date"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm  bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 required
@@ -232,7 +232,7 @@ export default function LecturerCreateSession() {
               <label className="block text-sm font-semibold text-slate-900 mb-1">Time</label>
               <input
                 type="time"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm  bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
                 required

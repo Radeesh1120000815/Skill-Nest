@@ -215,6 +215,8 @@ export const updateUserProfile = async (req, res) => {
         interests: updatedUser.interests,
         industry: updatedUser.industry,
         languages: updatedUser.languages,
+        batch_details: updatedUser.batch_details,
+        badges: updatedUser.badges,
         profilePublic: updatedUser.profilePublic,
         emailNotif: updatedUser.emailNotif,
         pushNotif: updatedUser.pushNotif,

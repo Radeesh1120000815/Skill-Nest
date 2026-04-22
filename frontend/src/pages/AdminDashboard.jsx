@@ -325,6 +325,7 @@ export default function AdminDashboard() {
 
                   {/* Footer — sits naturally after all content */}
                   <Footer />
+                  <ResourceAssistant />
                </div>
             </div>
          </div>

@@ -26,9 +26,9 @@ export default function LecturerCreateSession() {
     /*if (!stored) {
       navigate('/signin');
     }*/
-   if (!stored) { navigate('/signin'); return; }
-   const parsed = JSON.parse(stored);
-   if (parsed?.role !== 'LECTURER') { navigate('/signin', { replace: true }); return; }
+    if (!stored) { navigate('/signin'); return; }
+    const parsed = JSON.parse(stored);
+    if (parsed?.role !== 'LECTURER') { navigate('/signin', { replace: true }); return; }
   }, [navigate]);
 
   const handleSubmit = async (e) => {
@@ -87,11 +87,9 @@ export default function LecturerCreateSession() {
     const stored = localStorage.getItem('userInfo');
     const parsedUser = stored ? JSON.parse(stored) : null;
     const token = parsedUser?.token;
-    const userId = parsedUser?._id;
 
     try {
       setLoading(true);
-
       const backendUrl = 'http://localhost:5001';
 
       await axios.post(
@@ -103,21 +101,16 @@ export default function LecturerCreateSession() {
           description,
           date: isoDateTime,
           duration,
+          time, // 🟢 Added for display consistency in lists
         },
         {
-          /*headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            ...(userId ? { 'x-user-id': userId } : {}),
-          },*/
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       setSuccess('Session created successfully.');
-      // After create, go to sessions page to show created session details.
       setTimeout(() => {
-        navigate('/lecturer-sessions');
+        navigate('/lecturer-dashboard');
       }, 800);
     } catch (err) {
       const message = err?.response?.data?.message || 'Failed to create session. Please try again.';
@@ -132,15 +125,15 @@ export default function LecturerCreateSession() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f5f7f2]">
+    <div className="min-h-screen flex flex-col bg-slate-50">
       <Navbar />
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
-        <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-3xl font-extrabold text-slate-900">Create New Session</h1>
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-12">
+        <header className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Create New Session</h1>
           <button
             type="button"
             onClick={() => navigate('/lecturer-dashboard')}
-            className="inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50"
+            className="inline-flex items-center justify-center rounded-full border border-slate-200 px-6 py-2.5 text-xs font-black uppercase tracking-widest text-slate-500 bg-white hover:bg-slate-50 hover:text-slate-700 transition-all shadow-sm active:scale-95"
           >
             Back to Dashboard
           </button>
@@ -157,12 +150,12 @@ export default function LecturerCreateSession() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-slate-100 px-6 py-6 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white rounded-[3rem] shadow-[0_25px_60px_rgba(0,0,0,0.04)] border border-slate-100 px-10 py-10 space-y-8">
           <div>
             <label className="block text-sm font-semibold text-slate-900 mb-1">Session Title</label>
             <input
               type="text"
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm  bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-sm bg-slate-50 text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all placeholder-slate-300"
               placeholder="e.g. Advanced React Patterns"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -178,7 +171,7 @@ export default function LecturerCreateSession() {
               <label className="block text-sm font-semibold text-slate-900 mb-1">Subject</label>
               <input
                 type="text"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm  bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-sm bg-slate-50 text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all placeholder-slate-300"
                 placeholder="e.g. Data Structures"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
@@ -193,7 +186,7 @@ export default function LecturerCreateSession() {
               <input
                 type="number"
                 min="1"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm  bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-sm bg-slate-50 text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all placeholder-slate-300"
                 value={maxStudents}
                 onChange={(e) => setMaxStudents(e.target.value)}
                 required
@@ -219,7 +212,7 @@ export default function LecturerCreateSession() {
               <label className="block text-sm font-semibold text-slate-900 mb-1">Date</label>
               <input
                 type="date"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm  bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-sm bg-slate-50 text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all placeholder-slate-300"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 required
@@ -232,7 +225,7 @@ export default function LecturerCreateSession() {
               <label className="block text-sm font-semibold text-slate-900 mb-1">Time</label>
               <input
                 type="time"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm  bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-sm bg-slate-50 text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all placeholder-slate-300"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
                 required
@@ -246,7 +239,7 @@ export default function LecturerCreateSession() {
           <div>
             <label className="block text-sm font-semibold text-slate-900 mb-1">Duration</label>
             <select
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+              className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-sm bg-slate-50 text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all"
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
               required
@@ -265,16 +258,16 @@ export default function LecturerCreateSession() {
             <button
               type="button"
               onClick={handleCancel}
-              className="inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-full border border-slate-200 px-10 py-4 text-xs font-black uppercase tracking-widest text-slate-400 bg-white hover:bg-slate-50 hover:text-slate-600 transition-all active:scale-95 shadow-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center justify-center rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center rounded-full bg-[#1e3a8a] px-12 py-4 text-xs font-black uppercase tracking-widest text-white shadow-2xl shadow-blue-900/20 hover:bg-blue-800 transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? 'Creating...' : 'Create Session'}
+              {loading ? 'Synthesizing...' : 'Create Session'}
             </button>
           </div>
         </form>

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { X, Send, Sparkles, BookOpen, Loader2, ChevronDown, Trash2 } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
+const API = 'http://localhost:5001/api';
 
 const authCfg = () => {
   const u = JSON.parse(localStorage.getItem('userInfo') || 'null');
@@ -98,7 +98,7 @@ Guidelines:
 
     try {
       const info = JSON.parse(localStorage.getItem('userInfo') || 'null');
-      const response = await fetch('http://localhost:5000/api/ai/chat', {
+      const response = await fetch('http://localhost:5001/api/ai/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

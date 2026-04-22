@@ -14,7 +14,8 @@ import {
   UserPlus, Cpu, Trophy
 } from 'lucide-react';
 import { T, Icon, sharedStyles } from '../components/resources/theme.jsx';
-import { calculateMatchScore, getTopMatches } from '../utils/matchingService'; // I should move the service to frontend utils or import it if possible.
+import { calculateMatchScore, getTopMatches } from '../utils/matchingService';
+
 // Wait, the user didn't ask for a shared util, but I can use the logic.
 
 const HERO_SLIDES = [
@@ -207,7 +208,7 @@ const JuniorDashboard = () => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       const profileRes = await axios.get('http://localhost:5001/api/auth/profile', config);
-      
+
       const dbRole = profileRes.data.role?.toLowerCase();
       if (dbRole === 'senior' || dbRole === 'mentor') {
         navigate('/senior-dashboard', { replace: true });
@@ -2384,7 +2385,6 @@ const JuniorDashboard = () => {
       )}
 
       {feedbackModal.isOpen && renderFeedbackModal()}
-
     </div>
   );
 };

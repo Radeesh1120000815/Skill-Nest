@@ -68,13 +68,36 @@ export default function ResourceDetail() {
 
   const handleDownload = async () => {
     if (!user) return navigate('/signin');
+    
+    // Open blank window immediately to bypass popup blockers
+    const windowTarget = window.open('', '_blank');
+    if (windowTarget) {
+      windowTarget.document.write('<!DOCTYPE html><html><head><title>Opening Resource...</title><style>body{display:flex;justify-content:center;align-items:center;height:100vh;margin:0;font-family:sans-serif;background:#f8fafc;color:#64748b;}</style></head><body><div>Loading your resource...</div></body></html>');
+    }
+
     setDownloading(true);
     const res = await downloadResource(id);
+
     if (res.downloadUrl) {
-      window.open(res.downloadUrl, '_blank');
-      setDetail(prev => ({ ...prev, resource:{ ...prev.resource, downloadCount: res.downloadCount } }));
-      showMsg('success', '⬇️ Download started!');
+      // Ensure local file paths are absolute
+      const absoluteUrl = res.downloadUrl.startsWith('http')
+        ? res.downloadUrl
+        : `http://localhost:5001/${res.downloadUrl}`;
+
+      if (windowTarget) {
+        windowTarget.location.href = absoluteUrl;
+      } else {
+        // Fallback if window.open was somehow blocked initially
+        window.open(absoluteUrl, '_blank');
+      }
+
+      setDetail(prev => ({
+        ...prev,
+        resource: { ...prev.resource, downloadCount: res.downloadCount }
+      }));
+      showMsg('success', '⬇️ Resource opened successfully!');
     } else {
+      if (windowTarget) windowTarget.close();
       showMsg('error', res.message || 'Download failed');
     }
     setDownloading(false);

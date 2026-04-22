@@ -4,38 +4,43 @@
  */
 
 export const calculateMatchScore = (mentee, mentor) => {
-  let score = 0;
+  if (!mentee || !mentor) return 0;
+  
+  let score = 20; // 🚀 Base Affinity Score (prevents uninviting 0% for new users)
+  
   const weights = {
-    skillOverlap: 40,
-    industryMatch: 30,
-    languageMatch: 15,
-    ratingBonus: 15
+    skillOverlap: 35, // Adjusted from 40
+    industryMatch: 25, // Adjusted from 30
+    languageMatch: 10, // Adjusted from 15
+    ratingBonus: 10   // Adjusted from 15
   };
 
   // 1. Skill Overlap (Junior Interests vs Senior Skills)
-  if (mentee?.interests && mentor?.skills) {
+  if (Array.isArray(mentee.interests) && Array.isArray(mentor.skills) && mentee.interests.length > 0) {
     const overlappingSkills = mentee.interests.filter(skill => 
-      mentor.skills.some(s => s.toLowerCase() === skill.toLowerCase())
+      mentor.skills.some(s => s && s.toLowerCase() === skill.toLowerCase())
     );
-    const overlapPercentage = overlappingSkills.length / Math.max(mentee.interests.length, 1);
+    const overlapPercentage = overlappingSkills.length / mentee.interests.length;
     score += overlapPercentage * weights.skillOverlap;
   }
 
   // 2. Industry / Specialization Match
-  if (mentee?.batch_details?.specialization && mentor?.industry) {
-    if (mentee.batch_details.specialization.toLowerCase() === mentor.industry.toLowerCase()) {
+  const menteeSpec = mentee.batch_details?.specialization?.toLowerCase();
+  const mentorInd = mentor.industry?.toLowerCase();
+  const mentorHead = mentor.headline?.toLowerCase();
+
+  if (menteeSpec && mentorInd) {
+    if (menteeSpec === mentorInd) {
       score += weights.industryMatch;
-    }
-  } else if (mentor?.headline && mentee?.batch_details?.specialization) {
-    if (mentor.headline.toLowerCase().includes(mentee.batch_details.specialization.toLowerCase())) {
-      score += weights.industryMatch * 0.7;
+    } else if (mentorInd.includes(menteeSpec) || mentorHead?.includes(menteeSpec)) {
+      score += weights.industryMatch * 0.6;
     }
   }
 
   // 3. Language Match
-  if (mentee?.languages && mentor?.languages) {
+  if (Array.isArray(mentee.languages) && Array.isArray(mentor.languages)) {
     const commonLanguages = mentee.languages.filter(lang => 
-      mentor.languages.some(l => l.toLowerCase() === lang.toLowerCase())
+      mentor.languages.some(l => l && l.toLowerCase() === lang.toLowerCase())
     );
     if (commonLanguages.length > 0) {
       score += weights.languageMatch;
@@ -43,7 +48,7 @@ export const calculateMatchScore = (mentee, mentor) => {
   }
 
   // 4. Rating Bonus
-  if (mentor?.rating > 4) {
+  if (mentor.rating && mentor.rating >= 4) {
     score += weights.ratingBonus;
   }
 

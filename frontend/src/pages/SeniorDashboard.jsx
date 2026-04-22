@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { T, Icon, sharedStyles } from '../components/resources/theme.jsx';
 
+
 const HERO_SLIDES = [
   { type: 'text' },
   {
@@ -223,7 +224,7 @@ const SeniorDashboard = () => {
   const fetchMentorData = async (token) => {
     try {
       const config = { headers: { Authorization: `Bearer ${token || JSON.parse(localStorage.getItem('userInfo')).token}` } };
-      
+
       const profileRes = await axios.get('http://localhost:5001/api/auth/profile', config);
       const dbRole = profileRes.data.role?.toLowerCase();
       if (dbRole === 'junior' || dbRole === 'student') {
@@ -1029,7 +1030,7 @@ const SeniorDashboard = () => {
                         <button onClick={() => copyToClipboard(group.session_link)} className="p-4 bg-slate-50 text-slate-400 hover:bg-blue-600 hover:text-white rounded-2xl transition-all border border-slate-100 hover:border-blue-600 shadow-sm" title="Copy Invite Link">
                           <Share2 className="w-5 h-5" />
                         </button>
-                        <button onClick={() => handleManageStudents(group)} className="flex-1 py-4 bg-slate-900 hover:bg-indigo-600 text-white font-black rounded-2xl transition-all shadow-lg flex justify-center items-center group/btn space-x-2">
+                        <button onClick={() => handleManageStudents(group)} className="flex-1 py-4 bg-[#1e3a8a] hover:bg-indigo-600 text-white font-black rounded-2xl transition-all shadow-lg flex justify-center items-center group/btn space-x-2">
                           <span>Manage Students</span>
                           <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                         </button>
@@ -1526,7 +1527,7 @@ const SeniorDashboard = () => {
 
               {/* Module Metadata */}
               <div className="flex items-center mb-6">
-                <div className="w-16 h-16 bg-slate-900 rounded-2xl mr-5 flex items-center justify-center shadow-xl group-hover/card:scale-110 transition-transform duration-500">
+                <div className="w-16 h-16 bg-[#1e3a8a] rounded-2xl mr-5 flex items-center justify-center shadow-xl group-hover/card:scale-110 transition-transform duration-500">
                   <span className="text-white font-black text-xl">{group.module_name.charAt(0)}</span>
                 </div>
                 <div>
@@ -1562,7 +1563,7 @@ const SeniorDashboard = () => {
 
               {/* Action Interface */}
               <div className="flex space-x-4">
-                <button onClick={() => copyToClipboard(group.session_link)} className="p-5 bg-slate-900 text-white rounded-[1.5rem] hover:bg-indigo-600 transition-all shadow-xl shadow-slate-200 active:scale-95 group/share" title="Access Link">
+                <button onClick={() => copyToClipboard(group.session_link)} className="p-5 bg-[#1e3a8a] text-white rounded-[1.5rem] hover:bg-indigo-600 transition-all shadow-xl shadow-slate-200 active:scale-95 group/share" title="Access Link">
                   <Share2 className="w-5 h-5 group-hover/share:rotate-12 transition-transform" />
                 </button>
                 <button onClick={() => handleManageStudents(group)} className="flex-1 py-5 bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white font-black rounded-[1.5rem] transition-all border border-indigo-100 hover:border-indigo-600 flex justify-center items-center shadow-sm group/btn2 group/manage active:scale-95">
@@ -1808,7 +1809,7 @@ const SeniorDashboard = () => {
               <button
                 key={tab.id}
                 onClick={() => setSettingsTab(tab.id)}
-                className={`flex items-center w-full px-8 py-6 rounded-[2.5rem] font-black transition-all duration-500 border-none outline-none group relative overflow-hidden ${isActive ? 'bg-slate-900 text-white shadow-2xl shadow-indigo-200 translate-x-2' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'}`}
+                className={`flex items-center w-full px-8 py-6 rounded-[2.5rem] font-black transition-all duration-500 border-none outline-none group relative overflow-hidden ${isActive ? 'bg-[#1e3a8a] text-white shadow-2xl shadow-indigo-200 translate-x-2' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'}`}
               >
                 {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-indigo-500 rounded-r-full"></div>}
                 <div className={`p-3 rounded-2xl mr-5 transition-all duration-500 ${isActive ? 'bg-indigo-500/20 text-indigo-300 scale-110 shadow-lg shadow-indigo-900/50' : 'bg-slate-100 group-hover:bg-white shadow-sm'}`}>
@@ -1830,7 +1831,7 @@ const SeniorDashboard = () => {
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-10 mb-14">
                 <div className="relative group">
                   <div className="absolute -inset-2 bg-gradient-to-tr from-indigo-500 to-blue-600 rounded-[3.5rem] opacity-20 blur-lg group-hover:opacity-40 transition-opacity"></div>
-                  <div className="w-40 h-40 rounded-[3rem] bg-slate-900 flex items-center justify-center text-white text-6xl font-black shadow-2xl group-hover:scale-105 transition-all duration-500 overflow-hidden border-4 border-white relative z-10">
+                  <div className="w-40 h-40 rounded-[3rem] bg-[#1e3a8a] flex items-center justify-center text-white text-6xl font-black shadow-2xl group-hover:scale-105 transition-all duration-500 overflow-hidden border-4 border-white relative z-10">
                     {user?.avatar ? (
                       <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
@@ -1847,7 +1848,7 @@ const SeniorDashboard = () => {
                   <p className="text-slate-400 font-bold mb-6 text-xl leading-none">{user?.email}</p>
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
                     <span className="px-5 py-2.5 bg-indigo-50 text-indigo-600 text-[9px] font-black uppercase tracking-[0.2em] rounded-2xl border border-indigo-100 flex items-center shadow-sm"><ShieldCheck className="w-3.5 h-3.5 mr-2" /> Verified Operative</span>
-                    <span className="px-5 py-2.5 bg-slate-900 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-2xl border border-slate-800 flex items-center shadow-lg"><Sparkles className="w-3.5 h-3.5 mr-2 text-indigo-400" /> Tier 1 Mentor</span>
+                    <span className="px-5 py-2.5 bg-[#1e3a8a] text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-2xl border border-blue-800 flex items-center shadow-lg"><Sparkles className="w-3.5 h-3.5 mr-2 text-indigo-400" /> Tier 1 Mentor</span>
                   </div>
                 </div>
               </div>
@@ -1969,7 +1970,7 @@ const SeniorDashboard = () => {
                   </div>
                 </div>
                 <div className="pt-8">
-                  <button type="submit" disabled={isSavingPassword} className="px-12 py-5 bg-slate-900 hover:bg-indigo-600 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl transition-all flex items-center hover:-translate-y-1 disabled:opacity-50 active:scale-95">
+                  <button type="submit" disabled={isSavingPassword} className="px-12 py-5 bg-[#1e3a8a] hover:bg-indigo-600 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl transition-all flex items-center hover:-translate-y-1 disabled:opacity-50 active:scale-95">
                     {isSavingPassword ? 'Recalibrating...' : 'Update Security Key'} <Zap className="w-5 h-5 ml-4 text-indigo-400" />
                   </button>
                 </div>
@@ -2014,7 +2015,7 @@ const SeniorDashboard = () => {
                 ))}
 
                 <div className="pt-10 flex justify-end">
-                  <button onClick={handleSavePreferences} disabled={isSavingPreferences} className="px-10 py-5 bg-slate-900 hover:bg-indigo-600 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl shadow-2xl transition-all flex items-center hover:-translate-y-1 disabled:opacity-50 active:scale-95 group/save">
+                  <button onClick={handleSavePreferences} disabled={isSavingPreferences} className="px-10 py-5 bg-[#1e3a8a] hover:bg-indigo-600 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl shadow-2xl transition-all flex items-center hover:-translate-y-1 disabled:opacity-50 active:scale-95 group/save">
                     {isSavingPreferences ? 'Synchronizing...' : 'Save Parameters'} <Save className="w-5 h-5 ml-4 group-hover/save:scale-110 transition-transform" />
                   </button>
                 </div>
@@ -2367,7 +2368,7 @@ const SeniorDashboard = () => {
       {timerModalOpen && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-[#0f172a]/60 backdrop-blur-md transition-all">
           <div className="bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.3)] w-full max-w-md overflow-hidden border border-white/40 transform transition-all scale-100 opacity-100">
-            <div className="relative p-8 bg-gradient-to-br from-indigo-900 to-slate-900 text-white text-left overflow-hidden">
+            <div className="relative p-8 bg-gradient-to-br from-indigo-900 to-blue-900 text-white text-left overflow-hidden">
               <div className="absolute top-0 right-0 w-40 h-40 bg-fuchsia-500 rounded-full mix-blend-overlay filter blur-[50px] opacity-30"></div>
               <div className="flex justify-between items-start relative z-10">
                 <div>
@@ -2406,7 +2407,7 @@ const SeniorDashboard = () => {
       {editModal.isOpen && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-[#0f172a]/70 backdrop-blur-md transition-all">
           <div className="bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.5)] w-full max-w-lg max-h-[90vh] overflow-y-auto border border-indigo-500/30 transform transition-all scale-100 opacity-100 no-scrollbar">
-            <div className="relative p-8 bg-gradient-to-br from-indigo-900 to-slate-900 text-white text-left overflow-hidden">
+            <div className="relative p-8 bg-gradient-to-br from-indigo-900 to-blue-900 text-white text-left overflow-hidden">
               <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500 rounded-full mix-blend-overlay filter blur-[50px] opacity-30"></div>
               <div className="flex justify-between items-start relative z-10">
                 <div>
@@ -2470,7 +2471,7 @@ const SeniorDashboard = () => {
       {manageModal.isOpen && manageModal.group && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-[#0f172a]/60 backdrop-blur-md transition-all">
           <div className="bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.3)] w-full max-w-lg overflow-hidden border border-white/40 transform transition-all scale-100 opacity-100">
-            <div className="relative p-8 bg-gradient-to-br from-gray-900 to-gray-800 text-white text-left overflow-hidden">
+            <div className="relative p-8 bg-gradient-to-br from-blue-900 to-[#1e3a8a] text-white text-left overflow-hidden">
               <div className="absolute top-0 right-0 w-40 h-40 bg-fuchsia-500 rounded-full mix-blend-overlay filter blur-[50px] opacity-20"></div>
               <div className="flex justify-between items-start relative z-10">
                 <div>
@@ -2554,7 +2555,6 @@ const SeniorDashboard = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };

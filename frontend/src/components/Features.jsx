@@ -12,7 +12,7 @@ function Features() {
         {/* Card 1 */}
         <div className="feat-card" style={{ background: '#fff', border: '1.5px solid #e8edf3', borderRadius: 22, padding: '38px 28px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', boxShadow: '0 2px 12px 0 rgba(30,64,175,0.03)' }}>
           <div className="feat-icon" style={{ width: 48, height: 48, borderRadius: 12, background: '#eaf2fa', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="4" y="8" width="24" height="16" rx="4" fill="#6ea8fe"/><rect x="8" y="12" width="16" height="8" rx="2" fill="#b0b9c9"/><rect x="12" y="16" width="8" height="4" rx="1" fill="#94e0c6"/></svg>
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="4" y="8" width="24" height="16" rx="4" fill="#6ea8fe" /><rect x="8" y="12" width="16" height="8" rx="2" fill="#b0b9c9" /><rect x="12" y="16" width="8" height="4" rx="1" fill="#94e0c6" /></svg>
           </div>
           <h3 style={{ fontWeight: 700, fontSize: '1.18rem', color: '#1e293b', margin: 0, marginBottom: 10 }}>Create Sessions</h3>
           <p style={{ color: '#64748b', fontSize: '1.01rem', margin: 0 }}>Lecturers set up tutoring sessions in seconds — define the subject, pick a date and time, set capacity limits, and publish for students to discover.</p>
@@ -20,7 +20,7 @@ function Features() {
         {/* Card 2 */}
         <div className="feat-card" style={{ background: '#fff', border: '1.5px solid #e8edf3', borderRadius: 22, padding: '38px 28px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', boxShadow: '0 2px 12px 0 rgba(30,64,175,0.03)' }}>
           <div className="feat-icon" style={{ width: 48, height: 48, borderRadius: 12, background: '#fff7e6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="4" y="8" width="24" height="16" rx="4" fill="#b0b9c9"/><rect x="8" y="12" width="16" height="8" rx="2" fill="#6ea8fe"/><rect x="12" y="16" width="8" height="4" rx="1" fill="#ffe4a6"/></svg>
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="4" y="8" width="24" height="16" rx="4" fill="#b0b9c9" /><rect x="8" y="12" width="16" height="8" rx="2" fill="#6ea8fe" /><rect x="12" y="16" width="8" height="4" rx="1" fill="#ffe4a6" /></svg>
           </div>
           <h3 style={{ fontWeight: 700, fontSize: '1.18rem', color: '#1e293b', margin: 0, marginBottom: 10 }}>Smart Booking</h3>
           <p style={{ color: '#64748b', fontSize: '1.01rem', margin: 0 }}>Students browse sessions, filter by subject or lecturer, and request enrollment with a single click — no back-and-forth emails needed.</p>
@@ -28,7 +28,7 @@ function Features() {
         {/* Card 3 */}
         <div className="feat-card" style={{ background: '#fff', border: '1.5px solid #e8edf3', borderRadius: 22, padding: '38px 28px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', boxShadow: '0 2px 12px 0 rgba(30,64,175,0.03)' }}>
           <div className="feat-icon" style={{ width: 48, height: 48, borderRadius: 12, background: '#eafaf2', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="4" y="8" width="24" height="16" rx="4" fill="#b0b9c9"/><rect x="8" y="12" width="16" height="8" rx="2" fill="#94e0c6"/><rect x="12" y="16" width="8" height="4" rx="1" fill="#6ea8fe"/><path d="M10 18l4 4 8-8" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="4" y="8" width="24" height="16" rx="4" fill="#b0b9c9" /><rect x="8" y="12" width="16" height="8" rx="2" fill="#94e0c6" /><rect x="12" y="16" width="8" height="4" rx="1" fill="#6ea8fe" /><path d="M10 18l4 4 8-8" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </div>
           <h3 style={{ fontWeight: 700, fontSize: '1.18rem', color: '#1e293b', margin: 0, marginBottom: 10 }}>Approval Workflow</h3>
           <p style={{ color: '#64748b', fontSize: '1.01rem', margin: 0 }}>Lecturers stay in control — review booking requests, approve or decline students, and manage class sizes for quality experiences.</p>
@@ -36,7 +36,7 @@ function Features() {
         {/* Card 4 */}
         <div className="feat-card" style={{ background: '#fff', border: '1.5px solid #e8edf3', borderRadius: 22, padding: '38px 28px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', boxShadow: '0 2px 12px 0 rgba(30,64,175,0.03)' }}>
           <div className="feat-icon" style={{ width: 48, height: 48, borderRadius: 12, background: '#f6f0fa', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="4" y="8" width="24" height="16" rx="4" fill="#b0b9c9"/><rect x="8" y="12" width="16" height="8" rx="2" fill="#c6b4e0"/><rect x="12" y="16" width="8" height="4" rx="1" fill="#6ea8fe"/><path d="M16 12v8" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round"/></svg>
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="4" y="8" width="24" height="16" rx="4" fill="#b0b9c9" /><rect x="8" y="12" width="16" height="8" rx="2" fill="#c6b4e0" /><rect x="12" y="16" width="8" height="4" rx="1" fill="#6ea8fe" /><path d="M16 12v8" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" /></svg>
           </div>
           <h3 style={{ fontWeight: 700, fontSize: '1.18rem', color: '#1e293b', margin: 0, marginBottom: 10 }}>Secure Meeting Links</h3>
           <p style={{ color: '#64748b', fontSize: '1.01rem', margin: 0 }}>Once approved, lecturers share private video meeting links directly with enrolled students — keeping sessions secure and organised.</p>

@@ -20,16 +20,10 @@ import LecturerPendingRequests from './pages/LecturerPendingRequests';
 import LecturerActiveStudents from './pages/LecturerActiveStudents';
 import ForgotPassword from './pages/ForgotPassword';
 import MainForgot from './pages/MainForgot';
-<<<<<<< HEAD
-import Resources from './pages/Resources';
-=======
->>>>>>> origin/Lecture-Sessions
 import Sessions from './pages/Sessions';
 import HelpCenter from './pages/HelpCenter';
 import About from './pages/About';
 import Contact from './pages/Contact';
-<<<<<<< HEAD
-=======
 import ScrollToTop from './components/ScrollToTop';
 import ResourceHub from './pages/ResourceHub.jsx';
 import ResourceDetail from './pages/ResourceDetail.jsx';
@@ -42,7 +36,6 @@ import { ResourceProvider } from './components/context/ResourceContext.jsx';
 import WatchSession from './pages/WatchSession.jsx';
 import FeedbackPage from './pages/FeedbackPage.jsx';
 import './index.css'; // CSS imports
->>>>>>> origin/Lecture-Sessions
 
 
 /**  Simple route guard — redirects to /login if no token
@@ -60,21 +53,12 @@ const PrivateRoute = ({ children, allowedRoles }) => {
 
 function App() {
   return (
-<<<<<<< HEAD
-    <Router>    
-=======
     <Router>
       <ScrollToTop />
->>>>>>> origin/Lecture-Sessions
       <div className="App min-h-screen">
         <Routes>
           {/* Home Page */}
           <Route path="/" element={<HomePage />} />
-<<<<<<< HEAD
-          {/* Resources Page */}
-          <Route path="/resources" element={<Resources />} />
-=======
->>>>>>> origin/Lecture-Sessions
           {/* Sessions Page */}
           <Route path="/sessions" element={<Sessions />} />
           {/* About Page */}
@@ -83,20 +67,6 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           {/* Help Center Page */}
           <Route path="/help-center" element={<HelpCenter />} />
-<<<<<<< HEAD
-          {/* Auth Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/main-forgot" element={<MainForgot />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/register" element={<Register />} />
-          {/* Dashboard Routes (Mentorship platform eke dashboards) */}
-          <Route path="/junior-dashboard" element={<JuniorDashboard />} />
-          <Route path="/senior-dashboard" element={<SeniorDashboard />} />
-          {/* Oya dila nathi path ekak gahuvoth Login ekata redirect karanawa (404 safety) */}
-          <Route path="*" element={<Navigate to="/login" />} />
-=======
 
           {/* Resource routes */}
           <Route path="/resources" element={<ResourceProvider><ResourceHub /></ResourceProvider>} />
@@ -138,6 +108,7 @@ function App() {
           <Route path="/main-forgot" element={<MainForgot />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
 
+
           {/* Private: any authenticated user can upload */}
           <Route
             path="/upload-resource"
@@ -158,13 +129,11 @@ function App() {
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/signin" />} />
->>>>>>> origin/Lecture-Sessions
         </Routes>
           
       </div>
     </Router>
   );
-  return <HomePage />;
 }
 
 export default App; 

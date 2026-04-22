@@ -4,6 +4,8 @@ import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
+const API = 'http://localhost:5001';
+
 export default function LecturerDashboard() {
   const [user, setUser] = useState(null);
   const [allSessions, setAllSessions] = useState([]);

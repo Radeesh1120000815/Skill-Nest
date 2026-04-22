@@ -11,8 +11,7 @@ import mongoose from 'mongoose';
   dns.setServers(
     process.env.DNS_SERVERS.split(',').map((server) => server.trim())
   );
-}
-*/
+} */
 /**
  * MongoDB connection logic using ES Modules
  * Path: backend/src/config/db.js

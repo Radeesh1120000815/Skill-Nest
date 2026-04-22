@@ -6,6 +6,7 @@ import SearchFilterBar from '../components/resources/SearchFilterBar.jsx';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
 import { T, Icon, sharedStyles } from '../components/resources/theme.jsx';
+import ResourceAssistant from '../components/ResourceAssistant';
 
 // Font injection
 if (!document.getElementById('sn-fonts')) {
@@ -575,6 +576,7 @@ export default function ResourceHub() {
             </div>
 
             <Footer />
+            <ResourceAssistant />
           </main>
         </div>
       </div>

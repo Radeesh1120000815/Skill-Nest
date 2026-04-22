@@ -31,8 +31,8 @@ export default function LecturerSessions() {
         if (!stored) { navigate('/signin'); return; }
         const parsed = JSON.parse(stored);
         if (parsed?.role !== 'LECTURER') { navigate('/signin', { replace: true }); return; }
-        const token  = parsed?.token;   // safe, parsed exists
-        
+        const token = parsed?.token;   // safe, parsed exists
+
 
         // If there is no saved user at all, redirect to sign-in
         /*if (!stored) {
@@ -40,7 +40,7 @@ export default function LecturerSessions() {
           return;
         }*/
 
-        
+
         const backendUrl = 'http://localhost:5001';
 
         const { data } = await axios.get(`${backendUrl}/api/sessions/my`, {
@@ -164,11 +164,11 @@ export default function LecturerSessions() {
           duration: editForm.duration,
         },
         {
-         /* headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            ...(userId ? { 'x-user-id': userId } : {}),
-          },*/
+          /* headers: {
+             'Content-Type': 'application/json',
+             ...(token ? { Authorization: `Bearer ${token}` } : {}),
+             ...(userId ? { 'x-user-id': userId } : {}),
+           },*/
           headers: { Authorization: `Bearer ${token}` },
         }
       );
@@ -191,13 +191,13 @@ export default function LecturerSessions() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f5f7f2]">
+    <div className="min-h-screen flex flex-col bg-slate-50">
       <Navbar />
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
-        <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-extrabold text-slate-900">My Sessions</h1>
-            <p className="text-slate-600 mt-2 max-w-2xl text-sm">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-12">
+        <header className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight">My Sessions</h1>
+            <p className="text-slate-500 font-medium max-w-2xl text-sm leading-relaxed">
               This page shows all the sessions i have created as a lecturer.
               I can quickly review the key details, update information when plans change,
               and remove sessions that are no longer needed.
@@ -206,7 +206,7 @@ export default function LecturerSessions() {
           <button
             type="button"
             onClick={() => navigate('/lecturer-dashboard')}
-            className="inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50"
+            className="inline-flex items-center justify-center rounded-full border border-slate-200 px-6 py-2.5 text-xs font-black uppercase tracking-widest text-slate-500 bg-white hover:bg-slate-50 hover:text-slate-700 transition-all shadow-sm active:scale-95 whitespace-nowrap"
           >
             Back to Dashboard
           </button>
@@ -219,93 +219,93 @@ export default function LecturerSessions() {
         )}
 
         {editingSession && (
-          <section className="mb-6 bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">Edit Session</h2>
-            <form onSubmit={submitEdit} className="grid gap-4 md:grid-cols-2">
+          <section className="mb-12 bg-white rounded-[3rem] shadow-[0_25px_60px_rgba(0,0,0,0.04)] border border-slate-100 p-10 animate-in fade-in slide-in-from-top-4 duration-500">
+            <h2 className="text-2xl font-black text-slate-900 mb-8 border-b border-slate-50 pb-4">Edit Session</h2>
+            <form onSubmit={submitEdit} className="grid gap-6 md:grid-cols-2">
               <div className="md:col-span-2">
-                <label className="block text-xs font-medium text-slate-600 mb-1">Title</label>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Title</label>
                 <input
                   type="text"
                   value={editForm.title}
                   onChange={(e) => handleEditChange('title', e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-sm bg-slate-50 text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all placeholder-slate-300"
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Subject</label>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Subject</label>
                 <input
                   type="text"
                   value={editForm.subject}
                   onChange={(e) => handleEditChange('subject', e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-sm bg-slate-50 text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all placeholder-slate-300"
                   required
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Date</label>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Date</label>
                   <input
                     type="date"
                     value={editForm.date}
                     onChange={(e) => handleEditChange('date', e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-sm bg-slate-50 text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Time</label>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Time</label>
                   <input
                     type="time"
                     value={editForm.time}
                     onChange={(e) => handleEditChange('time', e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-sm bg-slate-50 text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all"
                     required
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Max Students</label>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Max Students</label>
                 <input
                   type="number"
                   min="1"
                   value={editForm.maxStudents}
                   onChange={(e) => handleEditChange('maxStudents', e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-sm bg-slate-50 text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all"
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Duration (minutes)</label>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Duration (minutes)</label>
                 <input
                   type="number"
                   min="1"
                   value={editForm.duration}
                   onChange={(e) => handleEditChange('duration', e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-sm bg-slate-50 text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all"
                   required
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-xs font-medium text-slate-600 mb-1">Description</label>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Description</label>
                 <textarea
-                  rows={3}
+                  rows={4}
                   value={editForm.description}
                   onChange={(e) => handleEditChange('description', e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-sm bg-slate-50 text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 focus:bg-white transition-all placeholder-slate-300 min-h-[120px]"
                 />
               </div>
-              <div className="md:col-span-2 flex justify-end gap-3 mt-2">
+              <div className="md:col-span-2 flex justify-end gap-3 mt-6 pt-6 border-t border-slate-50">
                 <button
                   type="button"
                   onClick={cancelEdit}
-                  className="inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50"
+                  className="inline-flex items-center justify-center rounded-full border border-slate-200 px-8 py-3 text-xs font-black uppercase tracking-widest text-slate-400 bg-white hover:bg-slate-50 hover:text-slate-600 transition-all active:scale-95 shadow-sm"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="inline-flex items-center justify-center rounded-full bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
+                  className="inline-flex items-center justify-center rounded-full bg-[#1e3a8a] px-10 py-3 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-blue-900/20 hover:bg-blue-800 transition-all active:scale-95"
                 >
                   Save Changes
                 </button>
@@ -317,58 +317,61 @@ export default function LecturerSessions() {
         {editingSession
           ? null
           : loading
-          ? (
+            ? (
               <p className="text-sm text-slate-500">Loading sessions...</p>
             )
-          : sessions.length === 0
-          ? (
-              <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center">
-                <p className="text-sm text-slate-500">You have not created any sessions yet.</p>
-              </div>
-            )
-          : (
-              <div className="space-y-4">
-                {sessions.map((session) => (
-                  <div
-                    key={session._id}
-                    className="bg-white rounded-2xl shadow-sm border border-slate-100 px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3"
-                  >
-                    <div>
-                      <h2 className="text-base font-semibold text-slate-900">{session.title}</h2>
-                      <p className="text-xs text-slate-500 mt-1">
-                        {session.subject}
-                        {session.date && (
-                          <>
-                            {' '}
-                            • {formatDateTime(session.date)}
-                          </>
+            : sessions.length === 0
+              ? (
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center">
+                  <p className="text-sm text-slate-500">You have not created any sessions yet.</p>
+                </div>
+              )
+              : (
+                <div className="space-y-4">
+                  {sessions.map((session) => (
+                    <div
+                      key={session._id}
+                      className="bg-white rounded-[2.5rem] shadow-[0_15px_40px_rgba(0,0,0,0.02)] border border-slate-100 px-8 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-6 hover:shadow-[0_20px_50px_rgba(0,0,0,0.04)] hover:border-blue-100 transition-all group"
+                    >
+                      <div className="space-y-1">
+                        <h2 className="text-xl font-black text-slate-900 group-hover:text-blue-900 transition-colors">{session.title}</h2>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                          <span className="text-blue-600 font-black">{session.subject}</span>
+                          {session.date && (
+                            <span className="flex items-center">
+                              <span className="w-1 h-1 bg-slate-300 rounded-full mr-2"></span>
+                              {formatDateTime(session.date)}
+                            </span>
+                          )}
+                          <span className="flex items-center">
+                            <span className="w-1 h-1 bg-slate-300 rounded-full mr-2"></span>
+                            {session.maxStudents} Students
+                          </span>
+                        </div>
+                        {session.description && (
+                          <p className="text-sm text-slate-500 mt-3 line-clamp-1 italic">"{session.description}"</p>
                         )}
-                      </p>
-                      {session.description && (
-                        <p className="text-xs text-slate-500 mt-1 line-clamp-2">{session.description}</p>
-                      )}
-                      <p className="text-xs text-slate-500 mt-1">Max students: {session.maxStudents}</p>
+                      </div>
+                      <div className="flex items-center gap-3 self-start md:self-auto">
+                        <button
+                          type="button"
+                          onClick={() => startEdit(session)}
+                          className="inline-flex items-center justify-center rounded-full border border-slate-200 px-6 py-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 bg-white hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all shadow-sm active:scale-95"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(session._id)}
+                          className="inline-flex items-center justify-center rounded-full bg-rose-50 text-rose-600 border border-rose-100 px-6 py-2.5 text-[10px] font-black uppercase tracking-widest hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all active:scale-95 shadow-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 self-start md:self-auto">
-                      <button
-                        type="button"
-                        onClick={() => startEdit(session)}
-                        className="inline-flex items-center justify-center rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(session._id)}
-                        className="inline-flex items-center justify-center rounded-full bg-red-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-600"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
       </main>
       <Footer />
     </div>

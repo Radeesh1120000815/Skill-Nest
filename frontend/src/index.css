@@ -4,13 +4,19 @@
   color: #0f172a;
   box-shadow: 0 4px 16px 0 #f5a62344;
 }
-.btn-learnmore:hover, .learn-more-btn:hover {
+
+.btn-learnmore:hover,
+.learn-more-btn:hover {
   background: #fff;
   color: #1e40af !important;
   border: 1.5px solid #1e40af;
   box-shadow: 0 2px 12px 0 #1e40af22;
 }
-.btn-getstarted, .join-free-btn, .cta-btn, .join-skill-nest-btn {
+
+.btn-getstarted,
+.join-free-btn,
+.cta-btn,
+.join-skill-nest-btn {
   background: #f5a623;
   color: #0f172a;
   border-radius: 18px;
@@ -20,37 +26,48 @@
   font-size: 1.15rem;
   transition: background 0.18s, color 0.18s, box-shadow 0.18s;
 }
-.btn-getstarted:hover, .join-free-btn:hover, .cta-btn:hover, .join-skill-nest-btn:hover {
+
+.btn-getstarted:hover,
+.join-free-btn:hover,
+.cta-btn:hover,
+.join-skill-nest-btn:hover {
   background: #ffbe4d;
   color: #0f172a;
   box-shadow: 0 4px 16px 0 #f5a62344;
 }
+
 /* Custom Navigation and Footer Link Hover Effects */
-.nav-a, .footer-link, .foot-col a, .foot-col .footer-link, .nav-btn {
+.nav-a,
+.footer-link,
+.foot-col a,
+.foot-col .footer-link,
+.nav-btn {
   transition: color 0.18s, background 0.18s, box-shadow 0.18s;
 }
+
 .nav-a:hover {
   color: #fff !important;
-  background: rgba(255,255,255,0.13);
+  background: rgba(255, 255, 255, 0.13);
   border-radius: 7px;
 }
-.footer-link:hover, .foot-col a:hover, .foot-col .footer-link:hover {
+
+.footer-link:hover,
+.foot-col a:hover,
+.foot-col .footer-link:hover {
   color: #f5a623 !important;
   background: rgba(245, 166, 35, 0.12);
   border-radius: 7px;
 }
+
 .nav-btn:hover {
   background: #ffbe4d;
   color: #0f172a;
   box-shadow: 0 4px 16px 0 #f5a62344;
 }
-<<<<<<< HEAD
-=======
 
 
 
 
->>>>>>> origin/Lecture-Sessions
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -61,15 +78,17 @@
 :root {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color-scheme: light dark;
-  
+
   /* Kuppi Platform Light Theme Colors */
-  --bg-color: #f9fafb; /* gray-50 */
-  --text-color: #111827; /* gray-900 */
+  --bg-color: #f9fafb;
+  /* gray-50 */
+  --text-color: #111827;
+  /* gray-900 */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-color: #111827; 
+    --bg-color: #111827;
     --text-color: #f3f4f6;
   }
 }
@@ -93,14 +112,23 @@
 
   /* 🔴 Typography (Standardized & Fixed) */
   /* text-gray-900 අයින් කළා, එතකොට parent ගෙන් color එක inherit වෙනවා */
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     @apply font-bold tracking-tight;
   }
 
-  h1 { @apply text-4xl md:text-5xl my-6; }
-  h2 { @apply text-2xl md:text-3xl my-4; }
+  h1 {
+    @apply text-4xl md:text-5xl my-6;
+  }
 
-  p { @apply leading-relaxed; }
+  h2 {
+    @apply text-2xl md:text-3xl my-4;
+  }
+
+  p {
+    @apply leading-relaxed;
+  }
 }
 
 /* Vite Layout Fix - centered app container */
@@ -114,24 +142,25 @@
    3. Custom Component Classes (Parana Design)
    --------------------------------------------------------- */
 @layer components {
+
   /* Oyage parana primary button style eka */
   .btn-primary {
-    @apply bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold 
-           hover:bg-indigo-700 transition-all active:scale-95 shadow-sm;
+    @apply bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-all active:scale-95 shadow-sm;
     cursor: pointer;
     display: inline-block;
   }
-  
+
   /* Dashboards wala use karapu card container style eka */
   .card-container {
-        background-color: #fff;
-        border-radius: 0.75rem;
-        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-        border: 1px solid #f3f4f6;
-        padding: 1.5rem;
-    }
-    .card-container.dark {
-        background-color: #1f2937;
-        border-color: #374151;
+    background-color: #fff;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    border: 1px solid #f3f4f6;
+    padding: 1.5rem;
+  }
+
+  .card-container.dark {
+    background-color: #1f2937;
+    border-color: #374151;
   }
 }

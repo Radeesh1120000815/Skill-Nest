@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
@@ -7,7 +7,7 @@ import {
   LayoutDashboard, BookOpen, User, LogOut, Search,
   Calendar, Clock, Users, Star, ChevronRight, X, CheckCircle,
   Sparkles, BookMarked, GraduationCap, Mail, Camera, Save,
-  AlertCircle, PlayCircle, Edit3, Trash2,
+  AlertCircle, PlayCircle, Edit3, Trash2, ChevronLeft,
 } from 'lucide-react';
 
 const API = 'http://localhost:5001/api';
@@ -29,6 +29,12 @@ const statusLabel = (s) =>
 const fmtDuration = (mins) =>
   mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60 > 0 ? `${mins % 60}m` : ''}`.trim() : `${mins}m`;
 
+const DAYS   = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTHS = [
+  'January','February','March','April','May','June',
+  'July','August','September','October','November','December',
+];
+
 // ─── Enrollment Modal ────────────────────────────────────────────────────────
 function EnrollModal({ session, user, onClose, onSuccess }) {
   const [form, setForm] = useState({
@@ -36,7 +42,6 @@ function EnrollModal({ session, user, onClose, onSuccess }) {
     phone: '',
     reason: '',
     experience: 'beginner',
-    
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -44,7 +49,6 @@ function EnrollModal({ session, user, onClose, onSuccess }) {
 
   const validate = () => {
     const e = {};
-    const ph = form.phone.replace(/\D/g, '');
     if (!form.studentUniversityId.trim()) e.studentUniversityId = 'University ID is required.';
     if (!form.phone.trim()) e.phone = 'Phone is required.';
     else if (!/^\d{10}$/.test(form.phone)) e.phone = 'Phone must be exactly 10 digits.';
@@ -67,6 +71,7 @@ function EnrollModal({ session, user, onClose, onSuccess }) {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-[#0f172a]/70 backdrop-blur-md">
@@ -119,13 +124,15 @@ function EnrollModal({ session, user, onClose, onSuccess }) {
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Phone *</label>
-              <input value={form.phone}onChange={(e) => {const digits = e.target.value.replace(/\D/g, '').slice(0, 10);setForm({ ...form, phone: digits });}}
-              placeholder="0XXXXXXXXX"
-              inputMode="numeric"
-              maxLength={10}
-              className={`w-full px-4 py-3 bg-slate-50 border-2 rounded-2xl font-bold text-slate-900 focus:outline-none focus:bg-white text-sm transition-all 
-              ${errors.phone ? 'border-rose-400' : 'border-slate-200 focus:border-indigo-400'}`}/>
-              
+              <input
+                value={form.phone}
+                onChange={(e) => { const digits = e.target.value.replace(/\D/g, '').slice(0, 10); setForm({ ...form, phone: digits }); }}
+                placeholder="0XXXXXXXXX"
+                inputMode="numeric"
+                maxLength={10}
+                className={`w-full px-4 py-3 bg-slate-50 border-2 rounded-2xl font-bold text-slate-900 focus:outline-none focus:bg-white text-sm transition-all ${errors.phone ? 'border-rose-400' : 'border-slate-200 focus:border-indigo-400'}`}
+              />
+              {errors.phone && <p className="text-rose-500 text-xs font-bold">{errors.phone}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Experience Level</label>
@@ -190,11 +197,14 @@ function EditBookingModal({ booking, onClose, onSuccess }) {
           {error && <div className="bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl px-4 py-3 text-sm font-semibold">{error}</div>}
           <div className="space-y-1.5">
             <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Phone</label>
-            <input value={form.phone}onChange={(e) => {const digits = e.target.value.replace(/\D/g, '').slice(0, 10);setForm({ ...form, phone: digits });}}
-            placeholder="0XXXXXXXXX"
-            inputMode="numeric"
-            maxLength={10}
-            className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-2xl font-bold text-slate-900 focus:outline-none focus:border-indigo-400 text-sm"/>
+            <input
+              value={form.phone}
+              onChange={(e) => { const digits = e.target.value.replace(/\D/g, '').slice(0, 10); setForm({ ...form, phone: digits }); }}
+              placeholder="0XXXXXXXXX"
+              inputMode="numeric"
+              maxLength={10}
+              className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-2xl font-bold text-slate-900 focus:outline-none focus:border-indigo-400 text-sm"
+            />
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Experience</label>
@@ -220,6 +230,151 @@ function EditBookingModal({ booking, onClose, onSuccess }) {
   );
 }
 
+// ─── Day Detail Modal (Calendar) ─────────────────────────────────────────────
+function DayModal({ date, bookings, onClose }) {
+  const navigate = useNavigate();
+  const weekday = date.toLocaleDateString('en-GB', { weekday: 'long' });
+  const dayNum  = date.getDate();
+  const monthYr = date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+  const accentMap = {
+    approved: { bar: 'bg-emerald-400', bg: 'bg-emerald-50', border: 'border-emerald-200', badge: 'bg-emerald-100 text-emerald-700', icon: '✅' },
+    rejected: { bar: 'bg-rose-400',    bg: 'bg-rose-50/60', border: 'border-rose-200',    badge: 'bg-rose-100 text-rose-600',     icon: '❌' },
+    pending:  { bar: 'bg-amber-400',   bg: 'bg-amber-50',   border: 'border-amber-200',   badge: 'bg-amber-100 text-amber-700',   icon: '⏳' },
+  };
+
+  return (
+    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xl">
+      <div
+        className="bg-white w-full max-w-md flex flex-col overflow-hidden shadow-[0_32px_80px_rgba(99,102,241,0.22)]"
+        style={{ borderRadius: '2.25rem' }}
+      >
+        {/* ── Header ── */}
+        <div className="relative overflow-hidden px-8 pt-8 pb-6"
+          style={{ background: 'linear-gradient(135deg,#eef2ff 0%,#e0e7ff 50%,#ddd6fe 100%)' }}>
+          {/* decorative circles */}
+          <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full bg-indigo-200/50 blur-2xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-violet-200/40 blur-2xl pointer-events-none" />
+
+          <button onClick={onClose}
+            className="absolute top-5 right-5 w-9 h-9 flex items-center justify-center bg-white/70 hover:bg-white text-slate-500 hover:text-slate-800 rounded-2xl shadow-sm transition-all backdrop-blur-sm">
+            <X className="w-4 h-4" />
+          </button>
+
+          <div className="relative z-10 flex items-center gap-5">
+            {/* Big date pill */}
+            <div className="shrink-0 flex flex-col items-center justify-center w-16 h-16 rounded-2xl shadow-lg text-white"
+              style={{ background: 'linear-gradient(135deg,#6366f1,#818cf8)' }}>
+              <span className="text-[10px] font-black uppercase tracking-widest leading-none opacity-80">
+                {date.toLocaleDateString('en-GB', { month: 'short' })}
+              </span>
+              <span className="text-3xl font-black leading-tight">{dayNum}</span>
+            </div>
+            <div>
+              <p className="text-[11px] font-black text-indigo-400 uppercase tracking-widest mb-0.5">{weekday}</p>
+              <h3 className="text-xl font-black text-slate-800 leading-tight">{monthYr}</h3>
+              <p className="text-xs font-semibold text-slate-500 mt-1">
+                {bookings.length === 0 ? 'No sessions' : `${bookings.length} session${bookings.length > 1 ? 's' : ''} scheduled`}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Body ── */}
+        <div className="overflow-y-auto max-h-[55vh] px-6 py-5 space-y-3 no-scrollbar">
+          {bookings.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-slate-300">
+              <div className="w-16 h-16 rounded-3xl bg-slate-50 flex items-center justify-center mb-3">
+                <Calendar className="w-7 h-7 text-slate-300" />
+              </div>
+              <p className="font-black text-slate-400 text-sm">Nothing scheduled</p>
+              <p className="text-xs text-slate-300 mt-1">Enjoy your free day! 🌸</p>
+            </div>
+          ) : (
+            bookings.map((booking) => {
+              const s = booking.sessionId;
+              if (!s) return null;
+              const a = accentMap[booking.status] || accentMap.pending;
+              return (
+                <div key={booking._id}
+                  className={`relative rounded-2xl border ${a.border} ${a.bg} overflow-hidden transition-all hover:shadow-md`}>
+                  {/* left colour bar */}
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 ${a.bar} rounded-l-2xl`} />
+                  <div className="pl-5 pr-4 py-4">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex-1 min-w-0">
+                        <span className="inline-block text-[9px] font-black bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-md uppercase tracking-wider mb-1">
+                          {s.subject}
+                        </span>
+                        <h4 className="font-black text-slate-800 text-sm leading-snug line-clamp-2">{s.title}</h4>
+                      </div>
+                      <span className={`shrink-0 text-[10px] font-black px-2.5 py-1 rounded-full ${a.badge}`}>
+                        {a.icon} {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3 text-[11px] font-semibold text-slate-500 mb-3">
+                      {s.lecturerName && (
+                        <span className="flex items-center gap-1">
+                          <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-500 flex items-center justify-center text-[8px]">👤</span>
+                          {s.lecturerName}
+                        </span>
+                      )}
+                      {s.time && (
+                        <span className="flex items-center gap-1">
+                          <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-500 flex items-center justify-center text-[8px]">🕐</span>
+                          {s.time}
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1">
+                        <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-500 flex items-center justify-center text-[8px]">⏱</span>
+                        {fmtDuration(s.durationMinutes)}
+                      </span>
+                    </div>
+
+                    {booking.lecturerNote && (
+                      <p className="text-[11px] text-slate-400 italic bg-white/80 rounded-xl px-3 py-2 border border-white mb-3">
+                        💬 {booking.lecturerNote}
+                      </p>
+                    )}
+
+                    {booking.status === 'approved' && (
+                      <button onClick={() => navigate(`/watch-session/${booking._id}`)}
+                        className="w-full py-2.5 text-white text-xs font-black rounded-xl flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-md"
+                        style={{ background: 'linear-gradient(135deg,#6366f1,#818cf8)' }}>
+                        <PlayCircle className="w-3.5 h-3.5" />
+                        {booking.isCompleted ? 'Rewatch Session' : 'Watch Now'}
+                      </button>
+                    )}
+                    {booking.status === 'pending' && (
+                      <div className="w-full py-2.5 bg-amber-100 text-amber-700 font-black rounded-xl text-[11px] text-center border border-amber-200 animate-pulse">
+                        ⏳ Awaiting lecturer approval
+                      </div>
+                    )}
+                    {booking.status === 'rejected' && (
+                      <div className="w-full py-2.5 bg-rose-100 text-rose-500 font-black rounded-xl text-[11px] text-center border border-rose-200">
+                        ❌ Application declined
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* ── Footer ── */}
+        <div className="px-6 pb-6 pt-2">
+          <button onClick={onClose}
+            className="w-full py-3.5 rounded-2xl font-black text-sm text-slate-500 bg-slate-100 hover:bg-slate-200 transition-all">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 const StudentDashboard = () => {
   const [user, setUser] = useState(null);
@@ -236,6 +391,11 @@ const StudentDashboard = () => {
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
+  // ── Calendar state ──────────────────────────────────────────────────────────
+  const today = new Date();
+  const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [selectedCalDay, setSelectedCalDay] = useState(null);
+
   useEffect(() => {
     const titleByTab = {
       dashboard: 'Student Dashboard — Skill Nest',
@@ -248,7 +408,6 @@ const StudentDashboard = () => {
   useEffect(() => {
     const hr = new Date().getHours();
     setGreeting(hr < 12 ? 'Good Morning' : hr < 18 ? 'Good Afternoon' : 'Good Evening');
-
     const info = JSON.parse(localStorage.getItem('userInfo') || 'null');
     const validStudentRoles = ['STUDENT', 'junior', 'senior', 'both'];
     if (!info || !validStudentRoles.includes(info.role)) { navigate('/signin', { replace: true }); return; }
@@ -299,7 +458,7 @@ const StudentDashboard = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleProfileSave = (e) => {
+  /*const handleProfileSave = (e) => {
     e.preventDefault(); setIsSaving(true);
     setTimeout(() => {
       setUser((prev) => ({ ...prev, name: profileData.name }));
@@ -307,7 +466,55 @@ const StudentDashboard = () => {
       info.name = profileData.name; localStorage.setItem('userInfo', JSON.stringify(info));
       setIsSaving(false); alert('✅ Profile updated!');
     }, 600);
-  };
+  };*/
+
+    const handleProfileSave = async (e) => {
+  e.preventDefault();
+
+  try {
+    const { data } = await axios.put(
+      `${API}/users/profile`,
+      profileData,
+      {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      }
+    );
+
+    alert("✅ Profile updated!");
+
+    setUser((prev) => ({ ...prev, ...data }));
+
+  } catch (err) {
+    alert("❌ Failed to update");
+  }
+};
+
+const handleDeleteAccount = async () => {
+  if (!window.confirm("Are you sure you want to delete your account?"))
+    return;
+
+  try {
+    await axios.delete(
+      `${API}/users/${user._id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      }
+    );
+
+    alert("Account deleted");
+    localStorage.removeItem("userInfo");
+    window.location.href = "/login";
+
+  } catch (err) {
+    alert("Delete failed");
+  }
+};
+
+
 
   const handleLogout = () => { localStorage.removeItem('userInfo'); navigate('/signin', { replace: true }); };
 
@@ -332,6 +539,46 @@ const StudentDashboard = () => {
   const approved  = myBookings.filter((b) => b.status === 'approved');
   const pending   = myBookings.filter((b) => b.status === 'pending');
   const completed = myBookings.filter((b) => b.isCompleted);
+
+  // ── Calendar derived ──────────────────────────────────────────────────────
+  const calYear  = viewDate.getFullYear();
+  const calMonth = viewDate.getMonth();
+
+  const bookingsByDate = useMemo(() => {
+    const map = {};
+    myBookings.forEach((b) => {
+      const s = b.sessionId;
+      if (!s?.date) return;
+      const d = new Date(s.date);
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      if (!map[key]) map[key] = [];
+      map[key].push(b);
+    });
+    return map;
+  }, [myBookings]);
+
+  const calFirstDay    = new Date(calYear, calMonth, 1).getDay();
+  const calDaysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const calCells = [];
+  for (let i = 0; i < calFirstDay; i++) calCells.push(null);
+  for (let d = 1; d <= calDaysInMonth; d++) calCells.push(d);
+  while (calCells.length % 7 !== 0) calCells.push(null);
+
+  const calDotColor = (s) =>
+    s === 'approved' ? 'bg-emerald-500' :
+    s === 'rejected' ? 'bg-rose-400' : 'bg-amber-400';
+
+  const monthBookings  = myBookings.filter((b) => {
+    const d = new Date(b.sessionId?.date);
+    return d.getFullYear() === calYear && d.getMonth() === calMonth;
+  });
+  const monthApproved  = monthBookings.filter((b) => b.status === 'approved').length;
+  const monthPending   = monthBookings.filter((b) => b.status === 'pending').length;
+  const monthCompleted = monthBookings.filter((b) => b.isCompleted).length;
+
+  const selectedDayBookings = selectedCalDay
+    ? bookingsByDate[`${selectedCalDay.getFullYear()}-${selectedCalDay.getMonth()}-${selectedCalDay.getDate()}`] || []
+    : [];
 
   if (loading || !user) return (
     <div className="min-h-screen flex items-center justify-center bg-[#F4F7FE]">
@@ -365,9 +612,9 @@ const StudentDashboard = () => {
           </div>
           <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
             {[
-              { label: 'Enrolled', value: approved.length, icon: BookOpen, color: 'text-blue-300' },
-              { label: 'Pending', value: pending.length, icon: Clock, color: 'text-amber-300' },
-              { label: 'Completed', value: completed.length, icon: CheckCircle, color: 'text-emerald-300' },
+              { label: 'Enrolled',  value: approved.length,  icon: BookOpen,     color: 'text-blue-300' },
+              { label: 'Pending',   value: pending.length,   icon: Clock,        color: 'text-amber-300' },
+              { label: 'Completed', value: completed.length, icon: CheckCircle,  color: 'text-emerald-300' },
               { label: 'Available', value: availableSessions.length, icon: Calendar, color: 'text-indigo-300' },
             ].map((s) => (
               <div key={s.label} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 text-center">
@@ -401,10 +648,10 @@ const StudentDashboard = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {filtered.map((session) => {
-              const booking   = bookingMap[session._id];
-              const isFull    = session.currentEnrollments >= session.maxStudents;
-              const fillPct   = Math.min(100, Math.round((session.currentEnrollments / session.maxStudents) * 100));
-              const dateStr   = new Date(session.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+              const booking = bookingMap[session._id];
+              const isFull  = session.currentEnrollments >= session.maxStudents;
+              const fillPct = Math.min(100, Math.round((session.currentEnrollments / session.maxStudents) * 100));
+              const dateStr = new Date(session.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
               return (
                 <div key={session._id}
@@ -596,6 +843,237 @@ const StudentDashboard = () => {
     </div>
   );
 
+  // ─── TAB: CALENDAR ───────────────────────────────────────────────────────
+  const renderCalendar = () => {
+    const upcoming = myBookings
+      .filter((b) => {
+        const d = new Date(b.sessionId?.date);
+        return d >= new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      })
+      .sort((a, b) => new Date(a.sessionId?.date) - new Date(b.sessionId?.date))
+      .slice(0, 5);
+
+    return (
+      <div className="space-y-7 animate-in fade-in duration-500">
+
+        {/* ── Top stat cards ── */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { label: 'This Month',  value: monthBookings.length, emoji: '📅', from: '#6366f1', to: '#818cf8' },
+            { label: 'Approved',    value: monthApproved,        emoji: '✅', from: '#10b981', to: '#34d399' },
+            { label: 'Pending',     value: monthPending,         emoji: '⏳', from: '#f59e0b', to: '#fbbf24' },
+            { label: 'Completed',   value: monthCompleted,       emoji: '🎓', from: '#3b82f6', to: '#60a5fa' },
+          ].map((s) => (
+            <div key={s.label} className="relative rounded-3xl p-5 text-white overflow-hidden shadow-lg"
+              style={{ background: `linear-gradient(135deg, ${s.from}, ${s.to})` }}>
+              <div className="absolute -bottom-3 -right-3 text-5xl opacity-20 select-none">{s.emoji}</div>
+              <p className="text-3xl font-black leading-none mb-1">{s.value}</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest opacity-80">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Calendar card ── */}
+        <div className="rounded-[2rem] overflow-hidden shadow-xl border border-indigo-100/60"
+          style={{ background: 'linear-gradient(160deg,#f8f7ff 0%,#ffffff 60%,#f0f4ff 100%)' }}>
+
+          {/* Calendar nav header */}
+          <div className="px-7 pt-7 pb-5 flex items-center justify-between"
+            style={{ background: 'linear-gradient(135deg,#eef2ff,#e0e7ff)' }}>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setViewDate(new Date(calYear, calMonth - 1, 1))}
+                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white shadow-sm text-indigo-500 hover:bg-indigo-600 hover:text-white transition-all">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <div className="text-center px-3">
+                <p className="text-xl font-black text-slate-800 leading-none">
+                  {MONTHS[calMonth]}
+                </p>
+                <p className="text-xs font-bold text-indigo-400 mt-0.5">{calYear}</p>
+              </div>
+              <button onClick={() => setViewDate(new Date(calYear, calMonth + 1, 1))}
+                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white shadow-sm text-indigo-500 hover:bg-indigo-600 hover:text-white transition-all">
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            <button onClick={() => setViewDate(new Date(today.getFullYear(), today.getMonth(), 1))}
+              className="px-5 py-2 text-white text-xs font-black rounded-xl shadow-md transition-all active:scale-95"
+              style={{ background: 'linear-gradient(135deg,#6366f1,#818cf8)' }}>
+              ✦ Today
+            </button>
+          </div>
+
+          {/* Day-of-week headers */}
+          <div className="grid grid-cols-7 px-3 pt-4 pb-2">
+            {['S','M','T','W','T','F','S'].map((d, i) => (
+              <div key={i} className="text-center text-[11px] font-black uppercase tracking-widest text-indigo-300">{d}</div>
+            ))}
+          </div>
+
+          {/* Day grid */}
+          <div className="grid grid-cols-7 gap-1 px-3 pb-5">
+            {calCells.map((day, idx) => {
+              if (day === null) return <div key={`e-${idx}`} />;
+
+              const key        = `${calYear}-${calMonth}-${day}`;
+              const dayBkgs    = bookingsByDate[key] || [];
+              const isToday    = today.getDate() === day && today.getMonth() === calMonth && today.getFullYear() === calYear;
+              const isSelected = selectedCalDay &&
+                selectedCalDay.getDate() === day &&
+                selectedCalDay.getMonth() === calMonth &&
+                selectedCalDay.getFullYear() === calYear;
+              const hasBooking = dayBkgs.length > 0;
+
+              // pick dominant status colour for background tint
+              const hasPending  = dayBkgs.some((b) => b.status === 'pending');
+              const hasApproved = dayBkgs.some((b) => b.status === 'approved');
+              const tintStyle   = !isSelected && hasBooking
+                ? hasApproved
+                  ? 'bg-emerald-50 border-emerald-200'
+                  : hasPending
+                  ? 'bg-amber-50 border-amber-200'
+                  : 'bg-rose-50 border-rose-200'
+                : '';
+
+              return (
+                <div key={day}
+                  onClick={() => setSelectedCalDay(new Date(calYear, calMonth, day))}
+                  className={`
+                    relative flex flex-col items-center justify-start pt-2 pb-1.5 rounded-2xl border cursor-pointer
+                    transition-all duration-200 min-h-[56px] group select-none
+                    ${isSelected
+                      ? 'border-transparent text-white shadow-lg scale-105'
+                      : isToday
+                      ? 'border-indigo-300 bg-indigo-50 shadow-sm'
+                      : hasBooking
+                      ? `${tintStyle} hover:scale-105 hover:shadow-md`
+                      : 'border-transparent bg-transparent hover:bg-slate-50'
+                    }
+                  `}
+                  style={isSelected ? { background: 'linear-gradient(135deg,#6366f1,#818cf8)' } : {}}
+                >
+                  <span className={`text-sm font-black leading-none
+                    ${isSelected ? 'text-white' : isToday ? 'text-indigo-600' : hasBooking ? 'text-slate-800' : 'text-slate-400'}`}>
+                    {day}
+                  </span>
+
+                  {/* Dot row */}
+                  {hasBooking && (
+                    <div className="flex gap-0.5 mt-1.5 flex-wrap justify-center max-w-[36px]">
+                      {dayBkgs.slice(0, 3).map((b, i) => (
+                        <div key={i} className={`w-1.5 h-1.5 rounded-full flex-shrink-0
+                          ${b.status === 'approved' ? 'bg-emerald-400' : b.status === 'rejected' ? 'bg-rose-400' : 'bg-amber-400'}
+                          ${isSelected ? 'opacity-70' : ''}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Extra count pill */}
+                  {dayBkgs.length > 3 && (
+                    <span className={`text-[8px] font-black mt-0.5 ${isSelected ? 'text-indigo-200' : 'text-indigo-400'}`}>
+                      +{dayBkgs.length - 3}
+                    </span>
+                  )}
+
+                  {/* Hover tooltip count */}
+                  {hasBooking && !isSelected && (
+                    <div className="absolute -top-2 -right-1 w-5 h-5 rounded-full text-white text-[9px] font-black
+                      flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-md"
+                      style={{ background: 'linear-gradient(135deg,#6366f1,#818cf8)' }}>
+                      {dayBkgs.length}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Legend inside card */}
+          <div className="flex items-center justify-center gap-6 pb-5 flex-wrap">
+            {[
+              { color: 'bg-emerald-400', label: 'Approved' },
+              { color: 'bg-amber-400',   label: 'Pending'  },
+              { color: 'bg-rose-400',    label: 'Rejected' },
+            ].map((l) => (
+              <div key={l.label} className="flex items-center gap-1.5">
+                <div className={`w-2.5 h-2.5 rounded-full ${l.color}`} />
+                <span className="text-[11px] font-bold text-slate-400">{l.label}</span>
+              </div>
+            ))}
+            <span className="text-[11px] text-slate-300 font-medium">· tap a day to view</span>
+          </div>
+        </div>
+
+        {/* ── Upcoming sessions ── */}
+        {upcoming.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm"
+                style={{ background: 'linear-gradient(135deg,#6366f1,#818cf8)' }}>
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <h3 className="text-lg font-black text-slate-800">Upcoming Sessions</h3>
+            </div>
+
+            <div className="space-y-3">
+              {upcoming.map((booking, i) => {
+                const s = booking.sessionId; if (!s) return null;
+                const d = new Date(s.date);
+                const statusColors = {
+                  approved: { pill: 'bg-emerald-100 text-emerald-700', left: '#10b981' },
+                  rejected: { pill: 'bg-rose-100 text-rose-600',       left: '#f43f5e' },
+                  pending:  { pill: 'bg-amber-100 text-amber-700',     left: '#f59e0b' },
+                };
+                const sc = statusColors[booking.status] || statusColors.pending;
+
+                return (
+                  <div key={booking._id}
+                    className="relative bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden flex items-center gap-4 px-5 py-4 group">
+                    {/* left accent line */}
+                    <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl" style={{ background: sc.left }} />
+
+                    {/* Date block */}
+                    <div className="shrink-0 w-11 h-11 rounded-2xl flex flex-col items-center justify-center text-white shadow-md"
+                      style={{ background: `linear-gradient(135deg,#6366f1,#818cf8)` }}>
+                      <span className="text-[8px] font-black uppercase tracking-wider leading-none opacity-80">
+                        {d.toLocaleDateString('en-GB', { month: 'short' })}
+                      </span>
+                      <span className="text-lg font-black leading-tight">{d.getDate()}</span>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="font-black text-slate-800 text-sm leading-snug truncate">{s.title}</p>
+                      <div className="flex gap-3 mt-1 text-[11px] font-semibold text-slate-400 flex-wrap">
+                        {s.time        && <span>🕐 {s.time}</span>}
+                        {s.lecturerName && <span>👤 {s.lecturerName}</span>}
+                        <span>⏱ {fmtDuration(s.durationMinutes)}</span>
+                      </div>
+                    </div>
+
+                    <span className={`shrink-0 text-[10px] font-black px-2.5 py-1 rounded-full ${sc.pill}`}>
+                      {statusLabel(booking.status)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Day modal */}
+        {selectedCalDay && (
+          <DayModal
+            date={selectedCalDay}
+            bookings={selectedDayBookings}
+            onClose={() => setSelectedCalDay(null)}
+          />
+        )}
+      </div>
+    );
+  };
+
   // ─── TAB: PROFILE ────────────────────────────────────────────────────────
   const renderProfile = () => (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-3xl mx-auto">
@@ -649,15 +1127,24 @@ const StudentDashboard = () => {
             <button type="submit" disabled={isSaving} className="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl shadow-lg text-sm disabled:opacity-70 flex items-center">
               {isSaving ? 'Saving...' : 'Save Changes'} <Save className="w-4 h-4 ml-2" />
             </button>
+            {/* DELETE BUTTON ADDED HERE */}
+            <button
+              type="button"
+              onClick={handleDeleteAccount}
+              className="bg-red-500 text-white px-4 py-4 rounded-2xl hover:bg-red-600 font-bold flex items-center justify-center"
+            >
+              <Trash2 className="w-5 h-5 mr-2" />
+              Delete Account
+            </button>
           </div>
         </form>
       </div>
 
       <div className="grid grid-cols-3 gap-5">
         {[
-          { label: 'Sessions Booked', value: myBookings.length, icon: BookOpen, color: 'bg-indigo-50 text-indigo-600' },
-          { label: 'Completed', value: completed.length, icon: CheckCircle, color: 'bg-emerald-50 text-emerald-600' },
-          { label: 'Pending', value: pending.length, icon: Clock, color: 'bg-amber-50 text-amber-600' },
+          { label: 'Sessions Booked', value: myBookings.length, icon: BookOpen,    color: 'bg-indigo-50 text-indigo-600' },
+          { label: 'Completed',       value: completed.length,  icon: CheckCircle, color: 'bg-emerald-50 text-emerald-600' },
+          { label: 'Pending',         value: pending.length,    icon: Clock,       color: 'bg-amber-50 text-amber-600' },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 flex flex-col items-center text-center">
             <div className={`w-12 h-12 ${s.color} rounded-2xl flex items-center justify-center mb-3`}><s.icon className="w-6 h-6" /></div>
@@ -678,8 +1165,9 @@ const StudentDashboard = () => {
         <aside className="fixed top-[84px] left-0 h-[calc(100vh-100px)] w-[260px] ml-6 bg-white/90 backdrop-blur-xl rounded-[2.5rem] hidden md:flex flex-col justify-between shadow-[0_10px_40px_rgba(0,0,0,0.04)] z-40 border border-white py-6">
           <div className="flex flex-col w-full px-5 gap-2 mt-4">
             {[
-              { id: 'dashboard', label: 'Dashboard',  icon: LayoutDashboard },
+              { id: 'dashboard', label: 'Dashboard',   icon: LayoutDashboard },
               { id: 'enrolled',  label: 'My Sessions', icon: BookMarked },
+              { id: 'calendar',  label: 'Calendar',    icon: Calendar },
               { id: 'profile',   label: 'My Profile',  icon: User },
             ].map(({ id, label, icon: Icon }) => (
               <button key={id} onClick={() => setActiveTab(id)}
@@ -724,6 +1212,7 @@ const StudentDashboard = () => {
           <div className="p-8 pt-6 max-w-7xl mx-auto w-full pb-20">
             {activeTab === 'dashboard' && renderDashboard()}
             {activeTab === 'enrolled'  && renderEnrolled()}
+            {activeTab === 'calendar'  && renderCalendar()}
             {activeTab === 'profile'   && renderProfile()}
           </div>
         </main>
@@ -738,5 +1227,3 @@ const StudentDashboard = () => {
 };
 
 export default StudentDashboard;
-
-

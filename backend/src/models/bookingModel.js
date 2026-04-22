@@ -29,10 +29,15 @@ const bookingSchema = mongoose.Schema(
     isCompleted: { type: Boolean, default: false },
     completedAt: { type: Date },
 
+    // 🔴 Mentorship Specifics
+    definedOutcomes: { type: String, trim: true }, // The "Goal" for this session
+    matchingScore:   { type: Number },              // Compatibility score at time of request
+
     // ── Feedback (unlocked after completion) ──────────────────────────────────
     feedback: {
       rating:      { type: Number, min: 1, max: 5 },
       comment:     { type: String },
+      skillMatrix: { type: Map, of: Number }, // e.g. { "React": 4, "State Mgmt": 5 }
       submittedAt: { type: Date },
     },
   },

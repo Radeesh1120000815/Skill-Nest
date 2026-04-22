@@ -1,29 +1,30 @@
-<<<<<<< HEAD
-import { Link } from "react-router-dom";
-
-function Navbar() {
-=======
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 
 function Navbar() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const notificationsRef = useRef(null);
 
-  let user = null;
-  if (typeof window !== 'undefined') {
-    const storedUser = localStorage.getItem('userInfo');
-    if (storedUser) {
-      try {
-        user = JSON.parse(storedUser);
-      } catch {
-        user = null;
+  useEffect(() => {
+    // Check if user is logged in
+    const checkUser = () => {
+      const userInfo = localStorage.getItem("userInfo");
+      if (userInfo) {
+        setUser(JSON.parse(userInfo));
+      } else {
+        setUser(null);
       }
-    }
-  }
+    };
+
+    checkUser();
+    // Listen for storage changes
+    window.addEventListener("storage", checkUser);
+    return () => window.removeEventListener("storage", checkUser);
+  }, []);
 
   const isLoggedIn = !!user;
   const isLecturer = String(user?.role || '').toUpperCase() === 'LECTURER';
@@ -83,11 +84,12 @@ function Navbar() {
 
   const handleSignOut = () => {
     localStorage.removeItem('userInfo');
+    setUser(null);
     setNotificationsOpen(false);
     navigate('/signin');
+    window.dispatchEvent(new Event("storage"));
   };
 
->>>>>>> origin/Lecture-Sessions
   return (
     <nav style={{ background: '#0f172a', padding: '0 36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 68, borderBottom: '1px solid rgba(255,255,255,0.08)', position: 'sticky', top: 0, zIndex: 200 }}>
       <Link className="logo" to="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', minHeight: 68 }}>
@@ -96,15 +98,6 @@ function Navbar() {
           Skill <span style={{ color: "#f5a623" }}>Nest</span>
         </span>
       </Link>
-<<<<<<< HEAD
-      <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
-        <Link className="nav-a" to="/" style={{ fontSize: '1rem', fontWeight: 500, color: 'rgba(255,255,255,0.75)', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px' }}>Home</Link>
-        <Link className="nav-a" to="/resources" style={{ fontSize: '1rem', fontWeight: 500, color: 'rgba(255,255,255,0.75)', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px' }}>Resources</Link>
-        <Link className="nav-a" to="/login" style={{ fontSize: '1rem', fontWeight: 500, color: 'rgba(255,255,255,0.75)', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px' }}>Kuppi</Link>
-        <Link className="nav-a" to="/sessions" style={{ fontSize: '1rem', fontWeight: 500, color: 'rgba(255,255,255,0.75)', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px' }}>Sessions</Link>
-        <Link className="nav-a" to="/help-center" style={{ fontSize: '1rem', fontWeight: 500, color: 'rgba(255,255,255,0.75)', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px' }}>Help Center</Link>
-        <Link className="nav-btn" to="/signin" style={{ fontWeight: 700, borderRadius: 10, padding: '10px 28px', textDecoration: 'none', marginLeft: 10, fontSize: '1rem', boxShadow: '0 2px 8px 0 #f5a62333', border: 'none' }}>Sign In</Link>
-=======
       <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: 32, position: 'relative' }}>
         {isLecturer ? (
           <>
@@ -133,7 +126,7 @@ function Navbar() {
                 </span>
               </button>
 
-              {isLecturer && notificationsOpen && (
+              {notificationsOpen && (
                 <div style={{ position: 'absolute', top: 52, right: -112, width: 280, background: '#0b1220', borderRadius: 16, padding: '14px 16px', boxShadow: '0 18px 45px rgba(15,23,42,0.65)', border: '1px solid rgba(148,163,184,0.45)' }}>
                   <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: 0.08, textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>
                     Notifications
@@ -175,14 +168,42 @@ function Navbar() {
             type="button"
             onClick={handleSignOut}
             className="nav-btn"
-            style={{ fontWeight: 700, borderRadius: 10, padding: '10px 28px', textDecoration: 'none', marginLeft: 10, fontSize: '1rem', boxShadow: '0 2px 8px 0 #f5a62333', border: 'none', background: '#fbbf24', color: '#111', cursor: 'pointer' }}
+            style={{ 
+              fontWeight: 700, 
+              borderRadius: 10, 
+              padding: '10px 28px', 
+              textDecoration: 'none', 
+              marginLeft: 10, 
+              fontSize: '1rem', 
+              boxShadow: '0 2px 8px 0 #f5a62333', 
+              border: 'none', 
+              background: '#f5a623', 
+              color: '#0f172a', 
+              cursor: 'pointer' 
+            }}
           >
             Sign Out
           </button>
         ) : (
-          <Link className="nav-btn" to="/signin" style={{ fontWeight: 700, borderRadius: 10, padding: '10px 28px', textDecoration: 'none', marginLeft: 10, fontSize: '1rem', boxShadow: '0 2px 8px 0 #f5a62333', border: 'none' }}>Sign In</Link>
+          <Link 
+            className="nav-btn" 
+            to="/signin" 
+            style={{ 
+              fontWeight: 700, 
+              borderRadius: 10, 
+              padding: '10px 28px', 
+              textDecoration: 'none', 
+              marginLeft: 10, 
+              fontSize: '1rem', 
+              boxShadow: '0 2px 8px 0 #f5a62333', 
+              border: 'none',
+              background: '#f5a623',
+              color: '#0f172a'
+            }}
+          >
+            Sign In
+          </Link>
         )}
->>>>>>> origin/Lecture-Sessions
       </div>
     </nav>
   );

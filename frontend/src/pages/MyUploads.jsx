@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
 import ResourceBanner from '../components/resources/ResourceBanner.jsx';
 import { T, Icon, sharedStyles, statusStyle, typeStyle } from '../components/resources/theme.jsx';
+import ResourceAssistant from '../components/ResourceAssistant.jsx';
 
 //  Sidebar nav 
 const NAV = [
@@ -322,6 +323,7 @@ export default function MyUploads() {
           </div>
         </div>
       </div>
+      <ResourceAssistant />
     </>
   );
 }

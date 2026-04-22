@@ -133,7 +133,6 @@ function App() {
       </div>
     </Router>
   );
-  return <HomePage />;
 }
 
 export default App; 

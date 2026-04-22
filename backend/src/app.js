@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 
 import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import groupRoutes from './routes/groupRoutes.js'; 
 import quizRoutes from './routes/quizRoutes.js';
 
@@ -30,13 +31,16 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+//const userRoutes = require("./routes/userRoutes");
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Required for multipart form fields
 
 
 
 // API Endpoints
-app.use('/api/auth', authRoutes); 
+app.use('/api/auth', authRoutes);
+app.use("/api/users", userRoutes); 
 app.use('/api/groups', groupRoutes); 
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/resources',        resourceRoutes);      // Public + auth resource endpoints

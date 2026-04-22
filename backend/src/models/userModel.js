@@ -7,9 +7,10 @@ const userSchema = mongoose.Schema(
     password: { type: String, required: true },
     role: { 
       type: String, 
-      enum: ['junior', 'senior', 'both'], 
-      default: 'junior' 
+      enum: ['junior', 'senior', 'both','STUDENT', 'LECTURER', 'ADMIN'], 
     },
+    universityId:{type: String},
+    
     batch_details: {
       year: Number,
       semester: Number,
@@ -28,6 +29,19 @@ const userSchema = mongoose.Schema(
     points: { type: Number, default: 0 },
     
     rating: { type: Number, default: 0 },
+
+    // 🔴 Mentorship Profile Fields
+    headline:  { type: String, trim: true },
+    bio:       { type: String, trim: true },
+    skills:    [{ type: String }],
+    interests: [{ type: String }],
+    industry:  { type: String, trim: true },
+    languages: [{ type: String, default: ['English'] }],
+
+    // 🔓 Privacy & Notifications Preferences
+    profilePublic: { type: Boolean, default: true },
+    emailNotif:    { type: Boolean, default: true },
+    pushNotif:     { type: Boolean, default: false },
 
     // 🔐 Forgot Password fields
     resetPasswordToken: String,

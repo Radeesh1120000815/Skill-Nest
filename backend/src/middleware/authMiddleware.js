@@ -37,3 +37,27 @@ export const seniorOnly = (req, res, next) => {
     res.status(403).json({ message: 'Access denied: Only Seniors can perform this action' });
   }
 };
+
+/**For public routes (e.g. GET /api/resources) that:
+ *  - Show approved resources to everyone
+ *  - BUT also return personalised data (isBookmarked, userRating) when logged in
+ * Never blocks — just silently sets req.user = null if no/invalid token.
+ */
+export const optionalAuth = async (req, res, next) => {
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    try {
+      const token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = await User.findById(decoded.id).select('-password');
+    } catch {
+      // Silently ignore invalid token — treat as unauthenticated
+      req.user = null;
+    }
+  } else {
+     req.user = null;
+  }
+  next();
+};

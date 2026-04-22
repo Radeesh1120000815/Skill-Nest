@@ -24,6 +24,15 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    //  normalise role to uppercase to avoid confusion related to multiple roles existing in the system
+    const roleMap = {
+      'Student': 'STUDENT', 'student': 'STUDENT',
+      'Lecturer': 'LECTURER', 'lecturer': 'LECTURER',
+      'Admin': 'ADMIN', 'admin': 'ADMIN',
+    };
+    const normalisedRole = roleMap[role] || role;
+    // END OF ADDITION
+
     // Password hashing (Salting)
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -32,7 +41,7 @@ export const registerUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role,
+      role:normalisedRole,
       batch_details
     });
 
@@ -59,6 +68,18 @@ export const loginUser = async (req, res) => {
 
     // bcrypt.compare use karala login eka check kireema
     if (user && (await bcrypt.compare(password, user.password))) {
+
+      // validate selected role matches actual role
+      const roleMap = {
+        'student': 'STUDENT', 'lecturer': 'LECTURER', 'admin': 'ADMIN'
+      };
+      const expectedRole = roleMap[req.body.role];
+      if (expectedRole && user.role !== expectedRole) {
+        return res.status(401).json({ 
+          message: `This account is registered as ${user.role.charAt(0) + user.role.slice(1).toLowerCase()}. Please select the correct account type.` 
+        });
+      }
+      // ROLE 
       res.json({
         _id: user._id,
         name: user.name,
@@ -77,6 +98,10 @@ export const loginUser = async (req, res) => {
 // @desc    Get user profile (Dashboard Data)
 export const getUserProfile = async (req, res) => {
   try {
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: 'Not authorized, user data missing' });
+    }
+
     const user = await User.findById(req.user._id);
 
     if (user) {
@@ -88,6 +113,71 @@ export const getUserProfile = async (req, res) => {
         batch_details: user.batch_details,
         badges: user.badges,
         rating: user.rating,
+        headline: user.headline || '',
+        bio: user.bio || '',
+        skills: user.skills || [],
+        interests: user.interests || [],
+        industry: user.industry || '',
+        languages: user.languages || ['English'],
+        profilePublic: user.profilePublic ?? true,
+        emailNotif: user.emailNotif ?? true,
+        pushNotif: user.pushNotif ?? false
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    console.error("getUserProfile Error:", error);
+    res.status(500).json({ message: "Server error fetching profile details", error: error.message });
+  }
+};
+
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+export const updateUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;
+      
+      // Update new fields
+      user.headline = req.body.headline !== undefined ? req.body.headline : user.headline;
+      user.bio      = req.body.bio !== undefined ? req.body.bio : user.bio;
+      user.skills   = req.body.skills || user.skills;
+      user.interests = req.body.interests || user.interests;
+      user.industry = req.body.industry || user.industry;
+      user.languages = req.body.languages || user.languages;
+
+      // Update preference fields
+      user.profilePublic = req.body.profilePublic !== undefined ? req.body.profilePublic : user.profilePublic;
+      user.emailNotif    = req.body.emailNotif    !== undefined ? req.body.emailNotif    : user.emailNotif;
+      user.pushNotif     = req.body.pushNotif     !== undefined ? req.body.pushNotif     : user.pushNotif;
+
+      if (req.body.password) {
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(req.body.password, salt);
+      }
+
+      const updatedUser = await user.save();
+
+      res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        headline: updatedUser.headline,
+        bio: updatedUser.bio,
+        skills: updatedUser.skills,
+        interests: updatedUser.interests,
+        industry: updatedUser.industry,
+        languages: updatedUser.languages,
+        profilePublic: updatedUser.profilePublic,
+        emailNotif: updatedUser.emailNotif,
+        pushNotif: updatedUser.pushNotif,
+        token: generateToken(updatedUser._id),
       });
     } else {
       res.status(404).json({ message: 'User not found' });
@@ -228,6 +318,43 @@ export const updatePassword = async (req, res) => {
 
     res.status(200).json({ message: 'Password updated successfully! 🔒✨' });
 
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+// @desc    Update user Kuppi role (junior/senior)
+// @route   PUT /api/auth/update-kuppi-role
+// @access  Public
+export const updateKuppiRole = async (req, res) => {
+  const { email, role } = req.body;
+  const allowedKuppiRoles = ['junior', 'senior', 'both'];
+
+  if (!allowedKuppiRoles.includes(role)) {
+    return res.status(400).json({ message: 'Invalid Kuppi role' });
+  }
+
+  try {
+    // ADD THIS: Never overwrite LECTURER or ADMIN roles
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) return res.status(404).json({ message: 'User not found' });
+    
+    if (['LECTURER', 'ADMIN'].includes(existingUser.role)) {
+      return res.status(403).json({ message: 'Cannot change role for this account type.' });
+    }
+
+    const user = await User.findOneAndUpdate(
+      { email },
+      { role },
+      { returnDocument: 'after' }
+    );
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -1,6 +1,9 @@
-import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import { useEffect, useState } from 'react';
+import { Shield, Mail, Lock, User, CheckCircle, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true); 
@@ -9,16 +12,22 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
-  // 🔴 අලුතින් එකතු කළා: Password එක පෙන්වනවද නැද්ද කියලා තීරණය කරන්න
   const [showPassword, setShowPassword] = useState(false);
   
-  // Loading සහ Error පෙන්වීමට States
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
   const navigate = useNavigate();
 
-  // 🛠️ Backend Base URL
+  useEffect(() => {
+    const mainUser = JSON.parse(localStorage.getItem('userInfo') || 'null');
+    if (mainUser?.email) {
+      setEmail(mainUser.email);
+      setName(mainUser.name || '');
+      setIsLogin(false); // Switch to register tab automatically
+    }
+  }, []);
+
   const API_URL = 'http://localhost:5001/api/auth';
 
   const handleSubmit = async (e) => {
@@ -28,23 +37,13 @@ const Login = () => {
 
     try {
       let response;
-      
       if (isLogin) {
-        response = await axios.post(`${API_URL}/login`, { 
-          email, 
-          password 
-        });
+        response = await axios.post(`${API_URL}/login`, { email, password });
       } else {
-        response = await axios.post(`${API_URL}/register`, { 
-          name, 
-          email, 
-          password, 
-          role 
-        });
+        response = await axios.post(`${API_URL}/register`, { name, email, password, role });
       }
 
       localStorage.setItem('userInfo', JSON.stringify(response.data));
-      
       const userRole = response.data.role?.toLowerCase();
       
       if (userRole === 'senior' || userRole === 'mentor' || userRole === 'both') {
@@ -54,139 +53,233 @@ const Login = () => {
       }
 
     } catch (err) {
-      setError(
-        err.response && err.response.data.message
-          ? err.response.data.message
-          : 'Connection error. Make sure backend is running on port 5001.'
-      );
+      const msg = err.response?.data?.message || 'Connection error.';
+      if (!isLogin && msg === 'User already exists') {
+        try {
+          const updateRes = await axios.put(`${API_URL}/update-kuppi-role`, { email, role });
+          localStorage.setItem('userInfo', JSON.stringify(updateRes.data));
+          if (role === 'senior') {
+            navigate('/senior-dashboard');
+          } else {
+            navigate('/junior-dashboard');
+          }
+        } catch (updateErr) {
+          setError('Could not update role. Please try again.');
+        }
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false); 
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
-      <div className="max-w-4xl w-full bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row transition-all duration-300">
-        
-        {/* Left Side - Graphic & Welcome Text */}
-        <div className="md:w-1/2 bg-gradient-to-br from-indigo-600 to-purple-700 text-white p-12 flex flex-col justify-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-white opacity-10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-48 h-48 bg-purple-400 opacity-20 rounded-full blur-3xl"></div>
-          
-          <div className="relative z-10">
-            <h2 className="text-4xl font-extrabold mb-4 leading-tight">
-              Welcome to<br/>Kuppi Platform
-            </h2>
-            <p className="text-indigo-100 text-lg font-medium leading-relaxed">
-              Empowering students and professionals globally through peer-to-peer mentorship and collaborative learning.
-            </p>
-          </div>
-        </div>
-
-        {/* Right Side - Two-Way Login/Signup Form */}
-        <div className="md:w-1/2 p-10 md:p-14 flex flex-col justify-center bg-white">
-          <div className="mb-6">
-            <h3 className="text-2xl font-bold text-gray-900">
-              {isLogin ? 'Sign In' : 'Create an Account'}
-            </h3>
-            <p className="text-gray-500 text-sm mt-1">
-              {isLogin ? 'Welcome back! Please enter your details.' : 'Join the platform as a mentor or learner.'}
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            
-            {/* Role Toggle Switch - (Only show when Sign Up) */}
-            {!isLogin && (
-              <div className="flex bg-gray-100 p-1.5 rounded-xl mb-4 shadow-inner">
-                <button type="button" onClick={() => setRole('junior')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${role === 'junior' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>🎓 Register as Learner</button>
-                <button type="button" onClick={() => setRole('senior')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${role === 'senior' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>👨‍🏫 Register as Mentor</button>
-              </div>
-            )}
-
-            {/* Error Message Box */}
-            {error && (
-              <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium border border-red-100 animate-fade-in-down">
-                {error}
-              </div>
-            )}
-
-            {!isLogin && (
-              <div className="animate-fade-in-down">
-                <label className="block text-sm font-semibold text-gray-700 mb-1 ml-1">Full Name</label>
-                <input type="text" placeholder={role === 'senior' ? 'e.g. John Doe' : 'e.g. Jane Smith'} className="w-full px-5 py-3.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50 focus:bg-white transition-all text-gray-900 shadow-sm" value={name} onChange={(e) => setName(e.target.value)} required={!isLogin} />
-              </div>
-            )}
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1 ml-1">Email Address</label>
-              <input type="email" placeholder={isLogin ? 'user@example.com' : (role === 'senior' ? 'mentor@example.com' : 'learner@example.com')} className="w-full px-5 py-3.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50 focus:bg-white transition-all text-gray-900 shadow-sm" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </div>
-
-            {/* 🔴 Password Field with Show/Hide Toggle */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1 ml-1">Password</label>
-              <div className="relative">
-                <input 
-                  type={showPassword ? "text" : "password"} 
-                  placeholder="••••••••" 
-                  className="w-full px-5 py-3.5 pr-12 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50 focus:bg-white transition-all text-gray-900 shadow-sm" 
-                  value={password} 
-                  onChange={(e) => setPassword(e.target.value)} 
-                  required 
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 transition-colors focus:outline-none"
-                >
-                  {showPassword ? (
-                    // Hide Icon (Eye Slash)
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                    </svg>
-                  ) : (
-                    // Show Icon (Eye)
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Forgot Password සහ Remember me */}
-            {isLogin && (
-              <div className="flex items-center justify-between text-sm mt-2">
-                <label className="flex items-center text-gray-600 cursor-pointer">
-                  <input type="checkbox" className="mr-2 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                  Remember me
-                </label>
-                <Link to="/forgot-password" className="text-indigo-600 font-bold hover:text-indigo-500 transition-colors">
-                  Forgot password?
-                </Link>
-              </div>
-            )}
-
-            <button 
-              type="submit" 
-              disabled={loading}
-              className={`w-full mt-4 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition-all ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-xl hover:-translate-y-0.5 active:scale-95'} ${!isLogin && role === 'senior' ? 'bg-gradient-to-r from-purple-600 to-indigo-600' : 'bg-gradient-to-r from-indigo-600 to-blue-600'}`}
-            >
-              {loading ? 'Processing...' : (isLogin ? 'Sign In Securely' : 'Create Account')}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center text-sm text-gray-600">
-            {isLogin ? "Don't have an account? " : "Already have an account? "}
-            <button type="button" onClick={() => { setIsLogin(!isLogin); setError(null); }} className="text-indigo-600 font-bold hover:text-indigo-800 transition-colors">
-              {isLogin ? 'Sign Up here' : 'Sign In here'}
-            </button>
-          </div>
-        </div>
-
+    <div className="min-h-screen flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 bg-[#f8fafc] dark:bg-[#0f172a]">
+      
+      {/* Global Navbar */}
+      <div className="w-full z-50 relative">
+        <Navbar />
       </div>
+
+      <main className="flex-1 flex items-center justify-center p-4 md:p-8 mt-[68px]">
+        <div className="max-w-6xl w-full glass-card overflow-hidden flex flex-col md:flex-row min-h-[650px] shadow-2xl">
+          
+          {/* Left Side - Visual Content */}
+          <div className="md:w-5/12 relative bg-indigo-900 text-white p-12 flex flex-col justify-between overflow-hidden">
+            <div className="absolute inset-0 z-0">
+              <img 
+                src="/kuppi-login-bg.png" 
+                alt="Kuppi Artwork" 
+                className="w-full h-full object-cover opacity-60 mix-blend-overlay"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-indigo-950 via-indigo-900/40 to-transparent"></div>
+            </div>
+            
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold tracking-widest uppercase mb-8">
+                <Shield className="w-3 h-3 text-cyan-400" />
+                <span>Secure Access</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-black mb-6 leading-tight tracking-tighter">
+                Master Your <br/>
+                <span className="text-cyan-400">Future</span> at <br/>
+                Kuppi Co.
+              </h2>
+              <p className="text-indigo-100/70 text-lg font-medium leading-relaxed max-w-sm">
+                Join thousands of students and mentors in the ultimate peer-to-peer learning experience.
+              </p>
+            </div>
+
+            <div className="relative z-10 mt-auto pt-10 border-t border-white/10 items-center gap-4 hidden md:flex">
+              <div className="flex -space-x-3">
+                {[1,2,3,4].map(i => (
+                  <div key={i} className="w-10 h-10 rounded-full border-2 border-indigo-900 bg-slate-200 overflow-hidden">
+                    <img src={`https://i.pravatar.cc/100?u=${i}`} alt="user" />
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm font-bold text-indigo-200">Joined by 5k+ students this week</p>
+            </div>
+          </div>
+
+          {/* Right Side - Form Section */}
+          <div className="md:w-7/12 p-8 md:p-16 flex flex-col justify-center bg-white dark:bg-slate-900/50">
+            <div className="mb-10 text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-4 mb-2">
+                <span className="text-3xl font-black tracking-tighter text-slate-900 dark:text-white">
+                  {isLogin ? 'Welcome Back' : 'Get Started'}
+                </span>
+                <span className="text-3xl">👋</span>
+              </div>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">
+                {isLogin ? "Enter your credentials to access your dashboard." : "Create your account to start your learning journey."}
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              
+              {!isLogin && (
+                <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl mb-8">
+                  <button 
+                    type="button" 
+                    onClick={() => setRole('junior')} 
+                    className={`flex-1 py-3 text-sm font-bold rounded-[0.9rem] transition-all duration-300 flex items-center justify-center gap-2 ${role === 'junior' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'text-slate-500'}`}
+                  >
+                    <User className="w-4 h-4" /> Learner
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setRole('senior')} 
+                    className={`flex-1 py-3 text-sm font-bold rounded-[0.9rem] transition-all duration-300 flex items-center justify-center gap-2 ${role === 'senior' ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' : 'text-slate-500'}`}
+                  >
+                    <Shield className="w-4 h-4" /> Mentor
+                  </button>
+                </div>
+              )}
+
+              {error && (
+                <div className="bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 p-4 rounded-2xl text-sm font-bold border border-rose-100 dark:border-rose-900/30 animate-shake">
+                  ⚠️ {error}
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {!isLogin && (
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">Full Name</label>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                        <User className="w-5 h-5" />
+                      </div>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. Alex Johnson" 
+                        className="w-full pl-12 pr-4 py-4 rounded-2xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 bg-slate-50 dark:bg-slate-800/50 dark:text-white transition-all" 
+                        value={name} 
+                        onChange={(e) => setName(e.target.value)} 
+                        required={!isLogin} 
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">Email Address</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                      <Mail className="w-5 h-5" />
+                    </div>
+                    <input 
+                      type="email" 
+                      placeholder="name@university.com" 
+                      className="w-full pl-12 pr-4 py-4 rounded-2xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 bg-slate-50 dark:bg-slate-800/50 dark:text-white transition-all" 
+                      value={email} 
+                      onChange={(e) => setEmail(e.target.value)} 
+                      required 
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">Password</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                      <Lock className="w-5 h-5" />
+                    </div>
+                    <input 
+                      type={showPassword ? "text" : "password"} 
+                      placeholder="••••••••" 
+                      className="w-full pl-12 pr-12 py-4 rounded-2xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 bg-slate-50 dark:bg-slate-800/50 dark:text-white transition-all" 
+                      value={password} 
+                      onChange={(e) => setPassword(e.target.value)} 
+                      required 
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-500 transition-colors focus:outline-none"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {isLogin && (
+                <div className="flex items-center justify-between mt-2">
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <div className="relative">
+                      <input type="checkbox" className="sr-only peer" />
+                      <div className="w-5 h-5 border-2 border-slate-300 dark:border-slate-600 rounded-lg peer-checked:bg-blue-600 peer-checked:border-blue-600 transition-all"></div>
+                      <CheckCircle className="absolute inset-0 w-5 h-5 text-white opacity-0 peer-checked:opacity-100 transition-opacity p-0.5" />
+                    </div>
+                    <span className="text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">Remember me</span>
+                  </label>
+                  <Link to="/forgot-password" virtual="true" className="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors">
+                    Forgot Password?
+                  </Link>
+                </div>
+              )}
+
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full btn-premium py-4 shadow-xl"
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Processing...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span>{isLogin ? 'Sign In to Account' : 'Create My Account'}</span>
+                    <ArrowRight className="w-5 h-5" />
+                  </div>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-10 text-center">
+              <p className="text-slate-500 dark:text-slate-400 font-medium">
+                {isLogin ? "First time here?" : "Already have an account?"}
+                <button 
+                  type="button" 
+                  onClick={() => { setIsLogin(!isLogin); setError(null); }} 
+                  className="ml-2 font-black text-blue-600 hover:text-blue-700 transition-colors"
+                >
+                  {isLogin ? 'Create Account' : 'Sign In'}
+                </button>
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </main>
+
+      <Footer />
+
     </div>
   );
 };

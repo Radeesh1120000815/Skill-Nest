@@ -5,7 +5,9 @@ import {
   getUserProfile,
   forgotPassword, 
   resetPassword,
-  updatePassword // 🔴 Aluthen ekathu kala: Dashboard eken password maru karanna
+  updatePassword ,// 🔴 Aluthen ekathu kala: Dashboard eken password maru karanna
+  updateKuppiRole,
+  updateUserProfile
 } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import User from '../models/userModel.js'; 
@@ -22,9 +24,13 @@ router.put('/reset-password/:token', resetPassword);
 
 // 🔒 Private route - Profile details
 router.get('/profile', protect, getUserProfile);
+router.put('/profile', protect, updateUserProfile);
 
 // 🔒 Private route - Change Password from Dashboard (Aluthen ekathu kala)
 router.put('/update-password', protect, updatePassword);
+
+// 🔓 Public route - Update Kuppi role
+router.put('/update-kuppi-role', updateKuppiRole);
 
 // 🟢 GET: Senior Mentors (Dashboard list eka hadanna)
 router.get('/mentors', protect, async (req, res) => {
@@ -32,7 +38,7 @@ router.get('/mentors', protect, async (req, res) => {
     const mentors = await User.find({ role: 'senior' }).select('-password');
     res.json(mentors);
   } catch (error) {
-    res.status(500).json({ message: "Server error fetching mentors" });
+    res.status(500).json({ message: "Server error fetching mentors", error: error.message });
   }
 });
 

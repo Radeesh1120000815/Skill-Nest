@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
 import ResourceBanner from '../components/resources/ResourceBanner.jsx';
 import { T, Icon, sharedStyles } from '../components/resources/theme.jsx';
+import ResourceAssistant from '../components/ResourceAssistant.jsx';
 
 const ALLOWED_FORMATS = 'PDF, DOCX, PPTX, XLSX, TXT, PNG, JPG (max 25 MB)';
 
@@ -338,6 +339,8 @@ export default function UploadNewVersion() {
           </div>
         </div>
       </div>
+      <ResourceAssistant />
+
     </>
   );
 }

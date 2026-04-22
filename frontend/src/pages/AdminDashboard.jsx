@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
 import { T, Icon, sharedStyles } from '../components/resources/theme.jsx';
+import ResourceAssistant from '../components/ResourceAssistant.jsx';
 
 const SIDEBAR_SECTIONS = [
   {
@@ -340,6 +341,7 @@ function StatCardInner({ s }) {
       </div>
       <div className="sn-head" style={{ fontSize:'28px', fontWeight:900, color:s.color, lineHeight:1, marginBottom:'4px' }}>{s.value}</div>
       <div style={{ fontSize:'13px', color:T.textSecondary, fontFamily:'Inter,sans-serif', fontWeight:500 }}>{s.label}</div>
+      <ResourceAssistant />
     </>
   );
 }

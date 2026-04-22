@@ -210,12 +210,17 @@ export const submitFeedback = async (req, res) => {
       return res.status(400).json({ message: 'You have already submitted feedback.' });
     }
  
-    const { rating, comment } = req.body;
+    const { rating, comment, skillMatrix } = req.body;
     if (!rating || rating < 1 || rating > 5) {
       return res.status(400).json({ message: 'Rating must be between 1 and 5.' });
     }
  
-    booking.feedback = { rating, comment, submittedAt: new Date() };
+    booking.feedback = { 
+      rating, 
+      comment, 
+      skillMatrix: skillMatrix || {}, // 🔴 Added Skill Matrix
+      submittedAt: new Date() 
+    };
     await booking.save();
  
     // ── Recalculate session average rating ────────────────────────────────

@@ -1,8 +1,11 @@
-import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+<<<<<<< HEAD
+=======
+import { useEffect, useState } from 'react';
+>>>>>>> origin/Lecture-Sessions
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true); 
@@ -15,9 +18,23 @@ const Login = () => {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+ 
   
   const navigate = useNavigate();
 
+<<<<<<< HEAD
+=======
+  // Pre-fill from main system login
+  useEffect(() => {
+    const mainUser = JSON.parse(localStorage.getItem('userInfo') || 'null');
+    if (mainUser?.email) {
+      setEmail(mainUser.email);
+      setName(mainUser.name || '');
+      setIsLogin(false); // Switch to register tab automatically
+    }
+  }, []);
+
+>>>>>>> origin/Lecture-Sessions
   const API_URL = 'http://localhost:5001/api/auth';
 
   const handleSubmit = async (e) => {
@@ -35,20 +52,35 @@ const Login = () => {
 
       localStorage.setItem('userInfo', JSON.stringify(response.data));
       const userRole = response.data.role?.toLowerCase();
-      
-      if (userRole === 'senior' || userRole === 'mentor' || userRole === 'both') {
+
+      if (userRole === 'admin') {
+        navigate('/admin-dashboard');
+      } else if (userRole === 'lecturer') {
+        navigate('/lecturer-dashboard');
+      } else if (userRole === 'senior' || userRole === 'mentor' || userRole === 'both') {
         navigate('/senior-dashboard');
       } else {
         navigate('/junior-dashboard');
       }
 
     } catch (err) {
-      setError(
-        err.response && err.response.data.message
-          ? err.response.data.message
-          : 'Connection error. Make sure backend is running on port 5001.'
-      );
-    } finally {
+      const msg = err.response?.data?.message || 'Connection error.';
+        if (!isLogin && msg === 'User already exists') {
+        try {
+          const updateRes = await axios.put(`${API_URL}/update-kuppi-role`, { email, role });
+          localStorage.setItem('userInfo', JSON.stringify(updateRes.data));
+          if (role === 'senior') {
+            navigate('/senior-dashboard');
+          } else {
+            navigate('/junior-dashboard');
+          }
+        } catch (updateErr) {
+          setError('Could not update role. Please try again.');
+        }
+      } else {
+        setError(msg);
+      }
+  } finally {
       setLoading(false); 
     }
   };

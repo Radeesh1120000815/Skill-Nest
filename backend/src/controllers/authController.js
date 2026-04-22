@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto'; // Token generate karanna use karana library eka
 import nodemailer from 'nodemailer'; // 🔴 Aluthen ekathu kala: Email yawanna
+import { ensureDbConnection } from '../config/db.js';
 
 // Helper function to create the JWT token
 const generateToken = (id) => {
@@ -19,12 +20,19 @@ export const registerUser = async (req, res) => {
   const { name, email, password, role, batch_details } = req.body;
 
   try {
+    // Ensure we have an active DB connection before querying
+    await ensureDbConnection();
+
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+<<<<<<< HEAD
     //  normalise role to uppercase for resource module
+=======
+    //  normalise role to uppercase to avoid confusion related to multiple roles existing in the system
+>>>>>>> origin/Lecture-Sessions
     const roleMap = {
       'Student': 'STUDENT', 'student': 'STUDENT',
       'Lecturer': 'LECTURER', 'lecturer': 'LECTURER',
@@ -64,8 +72,10 @@ export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    // Make sure DB is connected before querying
+    await ensureDbConnection();
 
+<<<<<<< HEAD
     // bcrypt.compare use karala login eka check kireema
     if (user && (await bcrypt.compare(password, user.password))) {
 
@@ -89,7 +99,68 @@ export const loginUser = async (req, res) => {
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
+=======
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+>>>>>>> origin/Lecture-Sessions
     }
+
+    let passwordMatches = false;
+
+    // Normal case: hashed password
+    if (user.password && user.password.startsWith('$2')) {
+      passwordMatches = await bcrypt.compare(password, user.password);
+    } else {
+      // Legacy plain-text fallback and automatic migration to hash
+      if (user.password === password) {
+        passwordMatches = true;
+        try {
+          const salt = await bcrypt.genSalt(10);
+          user.password = await bcrypt.hash(password, salt);
+          await user.save();
+        } catch (hashError) {
+          console.error('Error upgrading legacy password hash:', hashError.message);
+        }
+      }
+    }
+
+    if (!passwordMatches) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Optional: if frontend sends selected role, validate role alignment
+    const roleMap = {
+      student: 'STUDENT',
+      lecturer: 'LECTURER',
+      admin: 'ADMIN',
+    };
+
+    const normalizeRole = (role) => {
+      if (!role) return '';
+      const raw = String(role).toLowerCase();
+      if (raw === 'student' || raw === 'junior' || raw === 'senior' || raw === 'both') return 'STUDENT';
+      if (raw === 'lecturer') return 'LECTURER';
+      if (raw === 'admin') return 'ADMIN';
+      return String(role).toUpperCase();
+    };
+
+    const expectedRole = roleMap[req.body.role];
+    const actualRole = normalizeRole(user.role);
+
+    if (expectedRole && actualRole !== expectedRole) {
+      return res.status(401).json({
+        message: `This account is registered as ${actualRole.toLowerCase()}. Please select the correct account type.`,
+      });
+    }
+
+    return res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -253,4 +324,44 @@ export const updatePassword = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+<<<<<<< HEAD
 
+=======
+// @desc    Update user Kuppi role (junior/senior)
+// @route   PUT /api/auth/update-kuppi-role
+// @access  Public
+export const updateKuppiRole = async (req, res) => {
+  const { email, role } = req.body;
+  const allowedKuppiRoles = ['junior', 'senior', 'both'];
+
+  if (!allowedKuppiRoles.includes(role)) {
+    return res.status(400).json({ message: 'Invalid Kuppi role' });
+  }
+
+  try {
+    // ADD THIS: Never overwrite LECTURER or ADMIN roles
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) return res.status(404).json({ message: 'User not found' });
+    
+    if (['LECTURER', 'ADMIN'].includes(existingUser.role)) {
+      return res.status(403).json({ message: 'Cannot change role for this account type.' });
+    }
+
+    const user = await User.findOneAndUpdate(
+      { email },
+      { role },
+      { returnDocument: 'after' }
+    );
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+>>>>>>> origin/Lecture-Sessions

@@ -473,7 +473,7 @@ const StudentDashboard = () => {
 
   try {
     const { data } = await axios.put(
-      "http://localhost:5000/api/users/profile",
+      `${API}/users/profile`,
       profileData,
       {
         headers: {
@@ -497,7 +497,7 @@ const handleDeleteAccount = async () => {
 
   try {
     await axios.delete(
-      `http://localhost:5000/api/users/${user._id}`,
+      `${API}/users/${user._id}`,
       {
         headers: {
           Authorization: `Bearer ${user.token}`,

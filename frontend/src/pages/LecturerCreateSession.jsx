@@ -92,7 +92,7 @@ export default function LecturerCreateSession() {
     try {
       setLoading(true);
 
-      const backendUrl = 'http://localhost:5000';
+      const backendUrl = 'http://localhost:5001';
 
       await axios.post(
         `${backendUrl}/api/sessions`,

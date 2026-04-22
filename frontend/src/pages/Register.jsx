@@ -11,7 +11,7 @@ export default function Register() {
   useEffect(() => { document.title = 'Create Account — Skill Nest'; }, []);
 
   const [role, setRole] = useState(initialRole);
-  const [form, setForm] = useState({ name:"", id:"", email:"", password:"", confirm:"" });
+  const [form, setForm] = useState({ name: "", id: "", email: "", password: "", confirm: "" });
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
   const [apiError, setApiError] = useState('');
@@ -102,24 +102,24 @@ export default function Register() {
       //if (role === "Student")  endpoint = `${backendUrl}/api/students/register`;
 
       const payload = {
-        name:     form.name,
-        email:    form.email,
+        name: form.name,
+        email: form.email,
         password: form.password,
-        role:     role.toUpperCase(),
-        ...(role === "Student"  && { studentId:  form.id }),
+        role: role.toUpperCase(),
+        ...(role === "Student" && { studentId: form.id }),
         ...(role === "Lecturer" && { lecturerId: form.id }),
-        ...(role === "Admin"    && { role: "ADMIN" }),
+        ...(role === "Admin" && { role: "ADMIN" }),
       };
 
       await axios.post(endpoint, payload);
       setSuccess(true);
-      setLastUser({ name:form.name, email:form.email, id:form.id, role });
+      setLastUser({ name: form.name, email: form.email, id: form.id, role });
 
       if (role === "Student") {
         const saved = localStorage.getItem(STUDENT_KEY);
         let students = saved ? JSON.parse(saved) : [];
         if (!students.some(s => s.id === form.id || s.email === form.email)) {
-          students.push({ name:form.name, id:form.id, email:form.email });
+          students.push({ name: form.name, id: form.id, email: form.email });
           localStorage.setItem(STUDENT_KEY, JSON.stringify(students));
           setStudentList(students);
         }
@@ -164,7 +164,7 @@ export default function Register() {
       <main className="flex-1 flex items-center justify-center py-10 px-2">
         <div className="reg-card bg-white rounded-3xl p-8 max-w-lg w-full shadow-xl animate-fadeUp">
           <div className="flex items-center gap-2 justify-center mb-6">
-            <svg style={{width:32,height:32}} viewBox="0 0 44 44" fill="none">
+            <svg style={{ width: 32, height: 32 }} viewBox="0 0 44 44" fill="none">
               <circle cx="22" cy="22" r="20.5" fill="#eff6ff" stroke="#1e40af" strokeWidth="1.3" />
               <path d="M11 17 Q22 13.5 22 13.5 L22 24 Q22 24 11 28 Z" fill="#1e40af" opacity=".4" />
               <path d="M33 17 Q22 13.5 22 13.5 L22 24 Q22 24 33 28 Z" fill="#1e40af" opacity=".9" />
@@ -188,9 +188,9 @@ export default function Register() {
             <div className="text-center mb-1 font-bold text-sm text-slate-800">Choose your account type:</div>
             <div className="text-xs text-blue-700 flex items-center justify-center gap-1 mb-2">💡 Select the role that best describes you</div>
             <div className="grid grid-cols-3 gap-2 mt-2">
-              {['Student','Lecturer','Admin'].map((r) => (
+              {['Student', 'Lecturer', 'Admin'].map((r) => (
                 <button type="button" key={r} onClick={() => handleRole(r)}
-                  className={`role-tab flex flex-col items-center gap-2 px-3 py-4 rounded-xl border-2 font-semibold text-xs transition ${role===r?'border-blue-700 bg-blue-50 text-blue-700 shadow':'border-slate-200 bg-slate-50 text-slate-400'}`}>
+                  className={`role-tab flex flex-col items-center gap-2 px-3 py-4 rounded-xl border-2 font-semibold text-xs transition ${role === r ? 'border-blue-700 bg-blue-50 text-blue-700 shadow' : 'border-slate-200 bg-slate-50 text-slate-400'}`}>
                   {r}
                 </button>
               ))}
@@ -223,7 +223,7 @@ export default function Register() {
                     {studentList.map((stud) => (
                       <div key={stud.id + stud.email}
                         className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm text-slate-800"
-                        onClick={() => { setForm(f => ({ ...f, name:stud.name, id:stud.id, email:stud.email })); setShowStudentPopup(false); }}>
+                        onClick={() => { setForm(f => ({ ...f, name: stud.name, id: stud.id, email: stud.email })); setShowStudentPopup(false); }}>
                         <b>Name:</b> {stud.name} <span className="mx-2">|</span> <b>ID:</b> {stud.id} <span className="mx-2">|</span> <b>Email:</b> {stud.email}
                       </div>
                     ))}
@@ -232,10 +232,10 @@ export default function Register() {
               </div>
               {errors.name && <div className="field-error-wrap px-4 py-2"><span className="err-msg text-red-600 text-base">{errors.name}</span></div>}
 
-              {(role==="Student"||role==="Lecturer") && <>
+              {(role === "Student" || role === "Lecturer") && <>
                 <div className="field-wrap border-b border-slate-200">
                   <input type="text" name="id" value={form.id} onChange={handleChange}
-                    placeholder={role==="Student"?"Student ID (e.g. IT21234567)":"Lecturer ID (e.g. LE0012)"}
+                    placeholder={role === "Student" ? "Student ID (e.g. IT21234567)" : "Lecturer ID (e.g. LE0012)"}
                     className="block w-full px-6 py-5 text-lg text-slate-900 bg-white outline-none" />
                 </div>
                 {errors.id && <div className="field-error-wrap px-4 py-2"><span className="err-msg text-red-600 text-base">{errors.id}</span></div>}
@@ -243,13 +243,13 @@ export default function Register() {
 
               <div className="field-wrap border-b border-slate-200">
                 <input type="email" name="email" value={form.email} onChange={handleChange}
-                  placeholder={role==="Student"?"Email (e.g. student@gmail.com)":role==="Lecturer"?"Email (e.g. lecturer@gmail.com)":"Email (e.g. admin@gmail.com)"}
+                  placeholder={role === "Student" ? "Email (e.g. student@gmail.com)" : role === "Lecturer" ? "Email (e.g. lecturer@gmail.com)" : "Email (e.g. admin@gmail.com)"}
                   className="block w-full px-6 py-5 text-lg text-slate-900 bg-white outline-none" />
               </div>
               {errors.email && <div className="field-error-wrap px-4 py-2"><span className="err-msg text-red-600 text-base">{errors.email}</span></div>}
 
               <div className="field-wrap border-b border-slate-200 relative">
-                <input type={showPassword?"text":"password"} name="password" value={form.password} onChange={handleChange}
+                <input type={showPassword ? "text" : "password"} name="password" value={form.password} onChange={handleChange}
                   placeholder="Password (min 8 characters)"
                   className="block w-full px-6 py-5 text-lg text-slate-900 bg-white outline-none pr-12" />
                 <button type="button" tabIndex={-1}
@@ -261,7 +261,7 @@ export default function Register() {
               {errors.password && <div className="field-error-wrap px-4 py-2"><span className="err-msg text-red-600 text-base">{errors.password}</span></div>}
 
               <div className="field-wrap relative">
-                <input type={showConfirm?"text":"password"} name="confirm" value={form.confirm} onChange={handleChange}
+                <input type={showConfirm ? "text" : "password"} name="confirm" value={form.confirm} onChange={handleChange}
                   placeholder="Confirm Password"
                   className="block w-full px-6 py-5 text-lg text-slate-900 bg-white outline-none pr-12" />
                 <button type="button" tabIndex={-1}

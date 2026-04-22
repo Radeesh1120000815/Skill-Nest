@@ -41,7 +41,7 @@ export default function LecturerSessions() {
         }*/
 
         
-        const backendUrl = 'http://localhost:5000';
+        const backendUrl = 'http://localhost:5001';
 
         const { data } = await axios.get(`${backendUrl}/api/sessions/my`, {
           /*headers: {
@@ -75,7 +75,7 @@ export default function LecturerSessions() {
       const parsed = stored ? JSON.parse(stored) : null;
       const token = parsed?.token;
       const userId = parsed?._id;
-      const backendUrl = 'http://localhost:5000';
+      const backendUrl = 'http://localhost:5001';
 
       await axios.delete(`${backendUrl}/api/sessions/${id}`, {
         /*headers: {
@@ -149,7 +149,7 @@ export default function LecturerSessions() {
       const parsed = stored ? JSON.parse(stored) : null;
       const token = parsed?.token;
       const userId = parsed?._id;
-      const backendUrl = 'http://localhost:5000';
+      const backendUrl = 'http://localhost:5001';
 
       const isoDate = editForm.date && editForm.time ? new Date(`${editForm.date}T${editForm.time}`).toISOString() : editingSession.date;
 

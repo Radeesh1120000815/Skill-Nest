@@ -107,18 +107,6 @@ A collaborative space to upload reference materials featuring:
 
 ---
 
-## 📄 Developer Resume / CV Highlights (Ready to Copy)
-
-If you are updating your CV with this project, here are professional, result-oriented bullet points you can copy directly:
-
-* **Full-Stack Mentorship Architecture:** Engineered a real-time Senior-Junior student matchmaking and mentorship booking pipeline using React, Node.js, Express, and MongoDB, facilitating peer tutoring groups (Kuppi sessions).
-* **Tactical Request Workflow:** Built a role-restricted multi-state request system allowing students to submit study group join requests with defined outcome parameters; built backend hooks to process approvals, trigger SMTP alerts, and manage dynamic user directories.
-* **Real-time Gamification Engine:** Architected a campus leaderboard and progression system utilizing dynamic XP gains (+500 XP on session creations, +150 XP on student approvals) and customizable mentor-awarded student badges (*React Expert*, *DSA Master*), driving active platform engagement.
-* **Threaded Messaging & Chat System:** Developed a full CRUD continuous 2-way threaded inbox enabling rich communication between mentors and mentees with automatic read/unread notifications and message updates.
-* **Role-Verification Security:** Implemented custom middleware and frontend guards that enforce role-claim alignment during sign-in, preventing cross-role dashboard spoofing while caching remembered emails per role inside local storage.
-
----
-
 ## 📂 Directory Structure
 
 ```text
